@@ -132,6 +132,7 @@ class BeefManagementPeriod(BaseModel):
     weather_summary: WeatherSummary
     start_weight: confloat(ge=0, allow_inf_nan=False) = None
     end_weight: confloat(ge=0, allow_inf_nan=False) = None
+    average_daily_gain: confloat(ge=0, allow_inf_nan=False) = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
 
@@ -151,6 +152,7 @@ class DairyManagementPeriod(BaseModel):
     weather_summary: WeatherSummary
     start_weight: confloat(ge=0, allow_inf_nan=False) = None
     end_weight: confloat(ge=0, allow_inf_nan=False) = None
+    average_daily_gain: confloat(ge=0, allow_inf_nan=False) = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
 
@@ -169,6 +171,7 @@ class SheepManagementPeriod(BaseModel):
     weather_summary: WeatherSummary
     start_weight: confloat(ge=0, allow_inf_nan=False) = None
     end_weight: confloat(ge=0, allow_inf_nan=False) = None
+    average_daily_gain: confloat(ge=0, allow_inf_nan=False) = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
 
@@ -303,6 +306,7 @@ class BeefCattleInput(AnimalInputBase):
                 soil_texture=soil_texture),
             start_weight=management_period.start_weight,
             end_weight=management_period.end_weight,
+            average_daily_gain=management_period.average_daily_gain,
             diet_additive_type=management_period.diet_additive_type,
             bedding_material_type=management_period.bedding_material_type
         )
@@ -354,10 +358,13 @@ class DairyCattleInput(AnimalInputBase):
             number_of_animals=management_period.number_of_animals,
             production_stage=management_period.production_stage,
             number_of_young_animals=management_period.number_of_young_animals,
-            milk_data=Milk(),
+            milk_data=management_period.milk_data,
             diet=management_period.diet,
             housing_type=management_period.housing_type,
             manure_handling_system=management_period.manure_handling_system,
+            start_weight=management_period.start_weight,
+            end_weight=management_period.end_weight,
+            average_daily_gain=management_period.average_daily_gain,
             diet_additive_type=management_period.diet_additive_type,
             bedding_material_type=management_period.bedding_material_type,
 
@@ -426,6 +433,9 @@ class SheepFlockInput(AnimalInputBase):
             diet=management_period.diet,
             housing_type=management_period.housing_type,
             manure_handling_system=management_period.manure_handling_system,
+            start_weight=management_period.start_weight,
+            end_weight=management_period.end_weight,
+            average_daily_gain=management_period.average_daily_gain,
             diet_additive_type=management_period.diet_additive_type,
             bedding_material_type=management_period.bedding_material_type,
 

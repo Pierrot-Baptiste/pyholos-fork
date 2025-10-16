@@ -132,6 +132,7 @@ class Dairy(DairyBase):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -174,7 +175,12 @@ class Dairy(DairyBase):
         self.maintenance_coefficient.value = self._animal_coefficient_data.baseline_maintenance_coefficient
         self.gain_coefficient.value = self._animal_coefficient_data.gain_coefficient
 
-        self.average_daily_gain.value = (self.end_weight.value - self.start_weight.value) / management_period_days
+        # Added to hopefully allow user to input ADG instead of weights
+        # TODO: to be tested if Holos C# uses ADG directly
+        if average_daily_gain is None:
+            self.average_daily_gain.value = (self.end_weight.value - self.start_weight.value) / management_period_days
+        else:
+            self.average_daily_gain.value = average_daily_gain
 
         self.milk_production.value = milk_data.production
         self.milk_fat_content.value = milk_data.fat_content
@@ -244,6 +250,7 @@ class DairyHeifers(Dairy):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -273,6 +280,7 @@ class DairyLactatingCow(Dairy):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -302,6 +310,7 @@ class DairyCalves(Dairy):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -331,6 +340,7 @@ class DairyDryCow(Dairy):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):

@@ -213,6 +213,7 @@ class Sheep(SheepBase):
 
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
 
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
@@ -243,7 +244,10 @@ class Sheep(SheepBase):
         self.gain_coefficient_b.value = _animal_coefficient_data.coefficient_b
         self.wool_production.value = _animal_coefficient_data.wool_production
 
-        self.average_daily_gain.value = (self.end_weight.value - self.start_weight.value) / management_period_days
+        if average_daily_gain is None:
+            self.average_daily_gain.value = (self.end_weight.value - self.start_weight.value) / management_period_days
+        else:
+            self.average_daily_gain.value = average_daily_gain
 
         self.diet_additive_type.value = diet_additive_type.value
 
@@ -304,6 +308,7 @@ class SheepFeedlot(Sheep):
             manure_handling_system: ManureStateType,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -335,6 +340,7 @@ class Rams(Sheep):
             manure_handling_system: ManureStateType,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -368,6 +374,7 @@ class Ewes(Sheep):
             manure_handling_system: ManureStateType,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -399,6 +406,7 @@ class Lambs(Sheep):
             manure_handling_system: ManureStateType,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):

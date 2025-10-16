@@ -239,6 +239,7 @@ class Beef(BeefBase):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -290,7 +291,11 @@ class Beef(BeefBase):
         self.start_weight.value = self._animal_coefficient_data.default_initial_weight if start_weight is None else start_weight
         self.end_weight.value = self._animal_coefficient_data.default_final_weight if end_weight is None else end_weight
 
-        self.average_daily_gain.value = (self.end_weight.value - self.start_weight.value) / management_period_days
+        if average_daily_gain is None:
+            self.average_daily_gain.value = (self.end_weight.value - self.start_weight.value) / management_period_days
+        else:
+            self.average_daily_gain.value = average_daily_gain
+
         self.milk_production.value = milk_data.production
         self.milk_fat_content.value = milk_data.fat_content
         self.milk_protein_content_as_percentage.value = milk_data.protein_content_as_percentage
@@ -371,6 +376,7 @@ class Bulls(Beef):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -423,6 +429,7 @@ class ReplacementHeifers(Beef):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -475,6 +482,7 @@ class Cows(Beef):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -527,6 +535,7 @@ class Calves(Beef):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -579,6 +588,7 @@ class FinishingHeifers(Beef):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -631,6 +641,7 @@ class FinishingSteers(Beef):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -683,6 +694,7 @@ class BackgrounderHeifer(Beef):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -735,6 +747,7 @@ class BackgrounderSteer(Beef):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             start_weight: float = None,
             end_weight: float = None,
+            average_daily_gain: float = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
