@@ -15,13 +15,13 @@ from pyholos.components.common import ComponentType
 from pyholos.config import DATE_FMT
 
 
-class GroupNames(EnumGeneric):
-    bulls: str = "Bulls"
-    replacement_heifers: str = "Replacement heifers"
-    cows: str = "Cows"
-    calves: str = "Calves"
-    heifers: str = "Heifers"
-    steers: str = "Steers"
+class GroupNames(str, EnumGeneric):
+    bulls = "Bulls"
+    replacement_heifers = "Replacement heifers"
+    cows = "Cows"
+    calves = "Calves"
+    heifers = "Heifers"
+    steers = "Steers"
 
 
 class BeefBase(Component):

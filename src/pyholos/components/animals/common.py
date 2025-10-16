@@ -17,126 +17,126 @@ from pyholos.soil import SoilTexture
 from pyholos.utils import AutoNameEnum, read_holos_resource_table
 
 
-class DietAdditiveType(EnumGeneric):
+class DietAdditiveType(str, EnumGeneric):
     """Holos source code: https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Enumerations/DietAdditiveType.cs#L6
 
     """
-    two_percent_fat: str = "TwoPercentFat"
-    four_percent_fat: str = "FourPercentFat"
-    five_percent_fat: str = "FivePercentFat"
-    ionophore: str = "Inonophore"
-    ionophore_plus_two_percent_fat: str = "InonophorePlusTwoPercentFat"
-    ionophore_plus_four_percent_fat: str = "InonophorePlusFourPercentFat"
-    ionophore_plus_five_percent_fat: str = "IonophorePlusFivePercentFat"
-    custom: str = "Custom"
-    NONE: str = "None"
+    two_percent_fat = "TwoPercentFat"
+    four_percent_fat = "FourPercentFat"
+    five_percent_fat = "FivePercentFat"
+    ionophore = "Inonophore"
+    ionophore_plus_two_percent_fat = "InonophorePlusTwoPercentFat"
+    ionophore_plus_four_percent_fat = "InonophorePlusFourPercentFat"
+    ionophore_plus_five_percent_fat = "IonophorePlusFivePercentFat"
+    custom = "Custom"
+    NONE = "None"
 
 
-class ProductionStage(EnumGeneric):
-    gestating: str = "Gestating"
+class ProductionStage(str, EnumGeneric):
+    gestating = "Gestating"
     """Animals that are pregnant.
     """
 
-    lactating: str = "Lactating"
+    lactating = "Lactating"
     """Animals that are lactating. Also known as farrowing in swine systems.
     """
 
-    open: str = "Open"
+    open = "Open"
     """Animals that are neither lactating or pregnant.
     """
 
-    weaning: str = "Weaning"
+    weaning = "Weaning"
     """Animals that have not been weaned yet.
     """
 
-    growing_and_finishing: str = "GrowingAndFinishing"
+    growing_and_finishing = "GrowingAndFinishing"
     """Animals that have not been weaned yet.
     """
 
-    breeding_stock: str = "BreedingStock"
+    breeding_stock = "BreedingStock"
     """Animals that are used for breeding (boars, bulls, etc.)
     """
 
-    weaned: str = "Weaned"
+    weaned = "Weaned"
     """Animals that have been weaned and are no longer milk fed.
     """
 
 
-class AnimalType(EnumGeneric):
-    not_selected: str = "NotSelected"
-    alpacas: str = "Alpacas"
-    beef_backgrounder: str = "BeefBackgrounder"
-    beef_backgrounder_steer: str = "BeefBackgrounderSteer"
-    beef_backgrounder_heifer: str = "BeefBackgrounderHeifer"
-    beef_finishing_steer: str = "BeefFinishingSteer"
-    beef_finishing_heifer: str = "BeefFinishingHeifer"
-    beef: str = "Beef"
-    beef_bulls: str = "BeefBulls"
-    beef_calf: str = "BeefCalf"
-    beef_cow_lactating: str = "BeefCowLactating"  # This also means 'regular' cows (i.e. non-lactating)
-    beef_cow_dry: str = "BeefCowDry"
-    beef_finisher: str = "BeefFinisher"  # /// Also known as buffalo
-    bison: str = "Bison"
-    swine_boar: str = "SwineBoar"
-    broilers: str = "Broilers"
-    chicken: str = "Chicken"
-    cow_calf: str = "CowCalf"
-    beef_cow: str = "BeefCow"
-    calf: str = "Calf"
-    dairy: str = "Dairy"
-    dairy_bulls: str = "DairyBulls"
-    dairy_dry_cow: str = "DairyDryCow"
-    dairy_calves: str = "DairyCalves"
-    dairy_heifers: str = "DairyHeifers"
-    dairy_lactating_cow: str = "DairyLactatingCow"
-    deer: str = "Deer"
-    swine_dry_sow: str = "SwineDrySow"
-    ducks: str = "Ducks"
-    elk: str = "Elk"
-    ewes: str = "Ewes"  # Assumption is all ewes are pregnant
-    geese: str = "Geese"
-    goats: str = "Goats"
-    swine_grower: str = "SwineGrower"  # Also known as Hogs
-    horses: str = "Horses"
-    lambs: str = "Lambs"
-    lambs_and_ewes: str = "LambsAndEwes"
-    swine_lactating_sow: str = "SwineLactatingSow"
-    layers_dry_poultry: str = "LayersDryPoultry"
-    layers_wet_poultry: str = "LayersWetPoultry"
-    llamas: str = "Llamas"
-    mules: str = "Mules"
-    other_livestock: str = "OtherLivestock"
-    poultry: str = "Poultry"
-    beef_replacement_heifers: str = "BeefReplacementHeifers"
-    sheep: str = "Sheep"
-    ram: str = "Ram"
-    weaned_lamb: str = "WeanedLamb"
-    sheep_feedlot: str = "SheepFeedlot"
-    stockers: str = "Stockers"
-    stocker_steers: str = "StockerSteers"
-    stocker_heifers: str = "StockerHeifers"
-    swine: str = "Swine"
-    swine_starter: str = "SwineStarter"
-    swine_finisher: str = "SwineFinisher"
-    turkeys: str = "Turkeys"
-    young_bulls: str = "YoungBulls"
-    swine_gilts: str = "SwineGilts"  # Female pigs that have not farrowed a litter. Also known as maiden gilts.
-    swine_sows: str = "SwineSows"
-    swine_piglets: str = "SwinePiglets"
-    chicken_pullets: str = "ChickenPullets"  # Juvenile female
-    chicken_cockerels: str = "ChickenCockerels"  # Juvenile male
-    chicken_roosters: str = "ChickenRoosters"  # Adult male
-    chicken_hens: str = "ChickenHens"  # Adult female
-    young_tom: str = "YoungTom"  # Juvenile male turkey
-    tom: str = "Tom"  # Adult male turkey
-    young_turkey_hen: str = "YoungTurkeyHen"  # Young female turkey
-    turkey_hen: str = "TurkeyHen"  # Adult female turkey
-    chicken_eggs: str = "ChickenEggs"
-    turkey_eggs: str = "TurkeyEggs"
-    chicks: str = "Chicks"  # Newly hatched chicken
-    poults: str = "Poults"  # Newly hatched turkey
-    cattle: str = "Cattle"
-    layers: str = "Layers"
+class AnimalType(str, EnumGeneric):
+    not_selected = "NotSelected"
+    alpacas = "Alpacas"
+    beef_backgrounder = "BeefBackgrounder"
+    beef_backgrounder_steer = "BeefBackgrounderSteer"
+    beef_backgrounder_heifer = "BeefBackgrounderHeifer"
+    beef_finishing_steer = "BeefFinishingSteer"
+    beef_finishing_heifer = "BeefFinishingHeifer"
+    beef = "Beef"
+    beef_bulls = "BeefBulls"
+    beef_calf = "BeefCalf"
+    beef_cow_lactating = "BeefCowLactating"  # This also means 'regular' cows (i.e. non-lactating)
+    beef_cow_dry = "BeefCowDry"
+    beef_finisher = "BeefFinisher"  # /// Also known as buffalo
+    bison = "Bison"
+    swine_boar = "SwineBoar"
+    broilers = "Broilers"
+    chicken = "Chicken"
+    cow_calf = "CowCalf"
+    beef_cow = "BeefCow"
+    calf = "Calf"
+    dairy = "Dairy"
+    dairy_bulls = "DairyBulls"
+    dairy_dry_cow = "DairyDryCow"
+    dairy_calves = "DairyCalves"
+    dairy_heifers = "DairyHeifers"
+    dairy_lactating_cow = "DairyLactatingCow"
+    deer = "Deer"
+    swine_dry_sow = "SwineDrySow"
+    ducks = "Ducks"
+    elk = "Elk"
+    ewes = "Ewes"  # Assumption is all ewes are pregnant
+    geese = "Geese"
+    goats = "Goats"
+    swine_grower = "SwineGrower"  # Also known as Hogs
+    horses = "Horses"
+    lambs = "Lambs"
+    lambs_and_ewes = "LambsAndEwes"
+    swine_lactating_sow = "SwineLactatingSow"
+    layers_dry_poultry = "LayersDryPoultry"
+    layers_wet_poultry = "LayersWetPoultry"
+    llamas = "Llamas"
+    mules = "Mules"
+    other_livestock = "OtherLivestock"
+    poultry = "Poultry"
+    beef_replacement_heifers = "BeefReplacementHeifers"
+    sheep = "Sheep"
+    ram = "Ram"
+    weaned_lamb = "WeanedLamb"
+    sheep_feedlot = "SheepFeedlot"
+    stockers = "Stockers"
+    stocker_steers = "StockerSteers"
+    stocker_heifers = "StockerHeifers"
+    swine = "Swine"
+    swine_starter = "SwineStarter"
+    swine_finisher = "SwineFinisher"
+    turkeys = "Turkeys"
+    young_bulls = "YoungBulls"
+    swine_gilts = "SwineGilts"  # Female pigs that have not farrowed a litter. Also known as maiden gilts.
+    swine_sows = "SwineSows"
+    swine_piglets = "SwinePiglets"
+    chicken_pullets = "ChickenPullets"  # Juvenile female
+    chicken_cockerels = "ChickenCockerels"  # Juvenile male
+    chicken_roosters = "ChickenRoosters"  # Adult male
+    chicken_hens = "ChickenHens"  # Adult female
+    young_tom = "YoungTom"  # Juvenile male turkey
+    tom = "Tom"  # Adult male turkey
+    young_turkey_hen = "YoungTurkeyHen"  # Young female turkey
+    turkey_hen = "TurkeyHen"  # Adult female turkey
+    chicken_eggs = "ChickenEggs"
+    turkey_eggs = "TurkeyEggs"
+    chicks = "Chicks"  # Newly hatched chicken
+    poults = "Poults"  # Newly hatched turkey
+    cattle = "Cattle"
+    layers = "Layers"
 
     def is_young_type(self):
         return self in {
@@ -501,7 +501,6 @@ class Milk(BaseModel):
 
 
 class Diet(BaseModel):
-    specs: ClassVar = Field(NonNegativeFloat, ge=0, le=100)
     """Diet composition data
 
         Args:
@@ -514,6 +513,8 @@ class Diet(BaseModel):
             neutral_detergent_fiber_percentage: (-) percentage of neutral detergent fiber in the diet dry matter (between 0 and 100)
             metabolizable_energy: (Mcal kg-1) metabolizable energy of the diet
         """
+    specs: ClassVar = Field(NonNegativeFloat, ge=0, le=100)
+
     crude_protein_percentage: NonNegativeFloat
     forage_percentage: NonNegativeFloat
     total_digestible_nutrient_percentage: NonNegativeFloat
@@ -673,43 +674,43 @@ class Diet(BaseModel):
         return res
 
 
-class HousingType(EnumGeneric):
-    not_selected: str = "NotSelected"
-    confined_no_barn: str = "ConfinedNoBarn"
+class HousingType(str, EnumGeneric):
+    not_selected = "NotSelected"
+    confined_no_barn = "ConfinedNoBarn"
     """Also known as 'Confined no barn (feedlot)'
     """
-    housed_in_barn: str = "HousedInBarn"
-    housed_ewes: str = "HousedEwes"
-    housed_in_barn_solid: str = "HousedInBarnSolid"
-    housed_in_barn_slurry: str = "HousedInBarnSlurry"
-    enclosed_pasture: str = "EnclosedPasture"
-    open_range_or_hills: str = "OpenRangeOrHills"
-    tie_stall: str = "TieStall"
-    small_free_stall: str = "SmallFreeStall"
-    large_free_stall: str = "LargeFreeStall"
-    grazing_under3km: str = "GrazingUnder3km"
-    grazing_over3km: str = "GrazingOver3km"
-    confined: str = "Confined"
-    flat_pasture: str = "FlatPasture"
-    hilly_pasture_or_open_range: str = "HillyPastureOrOpenRange"
-    pasture: str = "Pasture"
+    housed_in_barn = "HousedInBarn"
+    housed_ewes = "HousedEwes"
+    housed_in_barn_solid = "HousedInBarnSolid"
+    housed_in_barn_slurry = "HousedInBarnSlurry"
+    enclosed_pasture = "EnclosedPasture"
+    open_range_or_hills = "OpenRangeOrHills"
+    tie_stall = "TieStall"
+    small_free_stall = "SmallFreeStall"
+    large_free_stall = "LargeFreeStall"
+    grazing_under3km = "GrazingUnder3km"
+    grazing_over3km = "GrazingOver3km"
+    confined = "Confined"
+    flat_pasture = "FlatPasture"
+    hilly_pasture_or_open_range = "HillyPastureOrOpenRange"
+    pasture = "Pasture"
     """Pasture, range, or paddock
     """
-    dry_lot: str = "DryLot"
+    dry_lot = "DryLot"
     """Also known as 'Standing or exercise yard'
     """
-    swath_grazing: str = "SwathGrazing"
-    custom: str = "Custom"
-    free_stall_barn_solid_litter: str = "FreeStallBarnSolidLitter"
-    free_stall_barn_slurry_scraping: str = "FreeStallBarnSlurryScraping"
-    free_stall_barn_flushing: str = "FreeStallBarnFlushing"
-    free_stall_barn_milk_parlour_slurry_flushing: str = "FreeStallBarnMilkParlourSlurryFlushing"
+    swath_grazing = "SwathGrazing"
+    custom = "Custom"
+    free_stall_barn_solid_litter = "FreeStallBarnSolidLitter"
+    free_stall_barn_slurry_scraping = "FreeStallBarnSlurryScraping"
+    free_stall_barn_flushing = "FreeStallBarnFlushing"
+    free_stall_barn_milk_parlour_slurry_flushing = "FreeStallBarnMilkParlourSlurryFlushing"
     """Also known as 'Milking parlour (slurry - flushing)'
     """
-    tie_stall_solid_litter: str = "TieStallSolidLitter"
+    tie_stall_solid_litter = "TieStallSolidLitter"
     """Also known as 'Tie-stall barn (solid)'
     """
-    tie_stall_slurry: str = "TieStallSlurry"
+    tie_stall_slurry = "TieStallSlurry"
     """Also known as 'Tie-stall barn (slurry)'
     """
 
@@ -777,19 +778,19 @@ class HousingType(EnumGeneric):
         }
 
 
-class BeddingMaterialType(EnumGeneric):
-    straw: str = 'Straw'
-    wood_chip: str = 'WoodChip'
-    separated_manure_solid: str = 'SeparatedManureSolid'
-    sand: str = 'Sand'
-    straw_long: str = 'StrawLong'
-    straw_chopped: str = 'StrawChopped'
-    shavings: str = 'Shavings'
-    sawdust: str = 'Sawdust'
-    paper_products: str = 'PaperProducts'
-    peat: str = 'Peat'
-    hemp: str = 'Hemp'
-    NONE = None
+class BeddingMaterialType(str, EnumGeneric):
+    straw = 'Straw'
+    wood_chip = 'WoodChip'
+    separated_manure_solid = 'SeparatedManureSolid'
+    sand = 'Sand'
+    straw_long = 'StrawLong'
+    straw_chopped = 'StrawChopped'
+    shavings = 'Shavings'
+    sawdust = 'Sawdust'
+    paper_products = 'PaperProducts'
+    peat = 'Peat'
+    hemp = 'Hemp'
+    NONE = "None"
 
 
 class Bedding:
@@ -1146,33 +1147,33 @@ class FractionOfOrganicNitrogenMineralizedData:
         return self.__dict__ == other.__dict__ if isinstance(other, self.__class__) else False
 
 
-class ManureStateType(EnumGeneric):
-    not_selected: str = "NotSelected"
-    anaerobic_digester: str = "AnaerobicDigester"
-    composted: str = "Composted"
-    compost_intensive: str = "CompostIntensive"  # Also known as 'compost - intensive windrow'
-    compost_passive: str = "CompostPassive"  # Also known as 'compost - passive windrow'
-    daily_spread: str = "DailySpread"
-    deep_bedding: str = "DeepBedding"
-    deep_pit: str = "DeepPit"  # Also known as 'Deep pit under barn'
-    liquid: str = "Liquid"
-    liquid_crust: str = "LiquidCrust"  # [Obsolete]
-    liquid_separated: str = "LiquidSeparated"  # [Obsolete]
-    liquid_no_crust: str = "LiquidNoCrust"  # Also known as 'Liquid/Slurry with no natural crust'
-    pasture: str = "Pasture"
-    range: str = "Range"
-    paddock: str = "Paddock"
-    solid: str = "Solid"
-    slurry: str = "Slurry"  # [Obsolete]
-    slurry_with_natural_crust: str = "SlurryWithNaturalCrust"  # [Obsolete]
-    slurry_without_natural_crust: str = "SlurryWithoutNaturalCrust"  # [Obsolete]
-    solid_storage: str = "SolidStorage"  # Also known as 'Solid storage (stockpiled)'
-    custom: str = "Custom"
-    pit_lagoon_no_cover: str = "PitLagoonNoCover"  # [Obsolete]
-    liquid_with_natural_crust: str = "LiquidWithNaturalCrust"  # Also known as 'Liquid/Slurry with natural crust'
-    liquid_with_solid_cover: str = "LiquidWithSolidCover"  # Also known as Liquid/Slurry with solid cover
-    composted_in_vessel: str = "CompostedInVessel"  # (Swine system)
-    solid_storage_with_or_without_litter: str = "SolidStorageWithOrWithoutLitter"  # (Poultry system) No different than 'Solid Storage' but poultry solid storage needs the term 'litter' which is incorrect to use in the case of cattle 'Solid Storage' since there is no 'litter' only 'bedding' when considering the cattle system
+class ManureStateType(str, EnumGeneric):
+    not_selected = "NotSelected"
+    anaerobic_digester = "AnaerobicDigester"
+    composted = "Composted"
+    compost_intensive = "CompostIntensive"  # Also known as 'compost - intensive windrow'
+    compost_passive = "CompostPassive"  # Also known as 'compost - passive windrow'
+    daily_spread = "DailySpread"
+    deep_bedding = "DeepBedding"
+    deep_pit = "DeepPit"  # Also known as 'Deep pit under barn'
+    liquid = "Liquid"
+    liquid_crust = "LiquidCrust"  # [Obsolete]
+    liquid_separated = "LiquidSeparated"  # [Obsolete]
+    liquid_no_crust = "LiquidNoCrust"  # Also known as 'Liquid/Slurry with no natural crust'
+    pasture = "Pasture"
+    range = "Range"
+    paddock = "Paddock"
+    solid = "Solid"
+    slurry = "Slurry"  # [Obsolete]
+    slurry_with_natural_crust = "SlurryWithNaturalCrust"  # [Obsolete]
+    slurry_without_natural_crust = "SlurryWithoutNaturalCrust"  # [Obsolete]
+    solid_storage = "SolidStorage"  # Also known as 'Solid storage (stockpiled)'
+    custom = "Custom"
+    pit_lagoon_no_cover = "PitLagoonNoCover"  # [Obsolete]
+    liquid_with_natural_crust = "LiquidWithNaturalCrust"  # Also known as 'Liquid/Slurry with natural crust'
+    liquid_with_solid_cover = "LiquidWithSolidCover"  # Also known as Liquid/Slurry with solid cover
+    composted_in_vessel = "CompostedInVessel"  # (Swine system)
+    solid_storage_with_or_without_litter = "SolidStorageWithOrWithoutLitter"  # (Poultry system) No different than 'Solid Storage' but poultry solid storage needs the term 'litter' which is incorrect to use in the case of cattle 'Solid Storage' since there is no 'litter' only 'bedding' when considering the cattle system
 
     # These methods correspond to the ManureStateTypeExtensions
     # https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Enumerations/ManureStateTypeExtensions.cs#L9

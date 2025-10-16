@@ -1,5 +1,5 @@
 from datetime import date
-from typing import ClassVar, Generator, Union
+from typing import ClassVar, Generator, Union, Type
 from uuid import UUID, uuid4
 
 from pydantic import (BaseModel, Field, NonNegativeFloat, NonNegativeInt,
@@ -8,16 +8,21 @@ from pydantic import (BaseModel, Field, NonNegativeFloat, NonNegativeInt,
 
 from pyholos.common2 import CanadianProvince
 from pyholos.components.animals import beef, dairy, sheep
-from pyholos.components.animals.common import (BeddingMaterialType, Diet,
-                                               DietAdditiveType, HousingType,
+from pyholos.components.animals.common import (BeddingMaterialType,
+                                               Diet,
+                                               DietAdditiveType,
+                                               HousingType,
                                                ManureAnimalSourceTypes,
                                                ManureLocationSourceType,
-                                               ManureStateType, Milk,
+                                               ManureStateType,
+                                               Milk,
                                                ProductionStage,
                                                get_manure_emission_factors)
 from pyholos.components.land_management.carbon.relative_biomass_information import (
-    RelativeBiomassInformationData, get_relative_biomass_information_data,
-    parse_table_7)
+    RelativeBiomassInformationData,
+    get_relative_biomass_information_data,
+    parse_table_7
+    )
 from pyholos.components.land_management.common import (FertilizerBlends,
                                                        HarvestMethod,
                                                        IrrigationType,
@@ -30,23 +35,66 @@ from pyholos.soil import SoilFunctionalCategory, SoilTexture
 from pyholos.utils import concat_lists
 
 AnimalComponent = Union[
-    beef.Bulls, beef.ReplacementHeifers, beef.Cows, beef.Calves,
-    beef.FinishingHeifers, beef.FinishingSteers,
-    beef.BackgrounderHeifer, beef.BackgrounderSteer,
-    dairy.DairyHeifers, dairy.DairyLactatingCow, dairy.DairyCalves, dairy.DairyDryCow,
-    sheep.SheepFeedlot, sheep.Rams, sheep.Ewes, sheep.Lambs
+    beef.Bulls,
+    beef.ReplacementHeifers,
+    beef.Cows,
+    beef.Calves,
+    beef.FinishingHeifers,
+    beef.FinishingSteers,
+    beef.BackgrounderHeifer,
+    beef.BackgrounderSteer,
+    dairy.DairyHeifers,
+    dairy.DairyLactatingCow,
+    dairy.DairyCalves,
+    dairy.DairyDryCow,
+    sheep.SheepFeedlot,
+    sheep.Rams,
+    sheep.Ewes,
+    sheep.Lambs
 ]
-type ManagementPeriods = list[BeefManagementPeriod | DairyManagementPeriod | SheepManagementPeriod]
+# BeefCattleComponent is a subset of AnimalComponent
+BeefCattleComponent = Union[
+    beef.Bulls,
+    beef.ReplacementHeifers,
+    beef.Cows,
+    beef.Calves,
+    beef.FinishingHeifers,
+    beef.FinishingSteers,
+    beef.BackgrounderHeifer,
+    beef.BackgrounderSteer,
+    ]
+# DaryCattleComponent is a subset of AnimalComponent
+DairyCattleComponent = Union[
+    dairy.DairyHeifers,
+    dairy.DairyLactatingCow,
+    dairy.DairyCalves,
+    dairy.DairyDryCow,
+    ]
+# SheepFlockComponent is a subset of AnimalComponent
+SheepFlockComponent = Union[
+    sheep.SheepFeedlot,
+    sheep.Rams,
+    sheep.Ewes,
+    sheep.Lambs
+]
+
+ManagementPeriod = Union[
+    "BeefManagementPeriod",
+    "DairyManagementPeriod",
+    "SheepManagementPeriod"
+    ]
+ManagementPeriods = list[ManagementPeriod]
 
 TypeWaterData = confloat(strict=True, ge=0, allow_inf_nan=False)
 TypeTemperatureData = confloat(strict=True, allow_inf_nan=False)
 
 
+# region Weather Inputs
 class WeatherData(BaseModel):
     """A class that holds daily values for precipitation (mm), potential_evapotranspiration (mm) and temperature (°C)
     for one year.
     """
-    spec_daily_data: ClassVar = dict(min_length=365, max_length=366)
+    spec_daily_data: ClassVar[dict[str, int]] = dict(min_length=365, max_length=366)
 
     year: int = Field(gt=CoreConstants.MinimumYear)
     precipitation: conlist(item_type=TypeWaterData, **spec_daily_data)
@@ -55,7 +103,7 @@ class WeatherData(BaseModel):
 
 
 class WeatherSummary(BaseModel):
-    spec_monthly_data: ClassVar = dict(min_length=12, max_length=12)
+    spec_monthly_data: ClassVar[dict[str, int]] = dict(min_length=12, max_length=12)
 
     year: int = Field(gt=1970)
     mean_annual_precipitation: TypeWaterData
@@ -68,6 +116,7 @@ class WeatherSummary(BaseModel):
     monthly_temperature: conlist(item_type=TypeTemperatureData, **spec_monthly_data)
 
 
+# region Management Periods
 class BeefManagementPeriod(BaseModel):
     name: str = Field(min_length=1)
     start_date: date
@@ -124,6 +173,7 @@ class SheepManagementPeriod(BaseModel):
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
 
 
+# region Animal Inputs
 class AnimalInputBase(BaseModel):
     def __iter__(self):
         for k, v in self.__dict__.items():
@@ -175,25 +225,16 @@ class AnimalInputBase(BaseModel):
         return res
 
 
+# region Beef Inputs
 class BeefCattleInput(AnimalInputBase):
-    Bulls: ManagementPeriods = None
-    ReplacementHeifers: ManagementPeriods = None
-    Cows: ManagementPeriods = None
-    Calves: ManagementPeriods = None
-    FinishingHeifers: ManagementPeriods = None
-    FinishingSteers: ManagementPeriods = None
-    BackgrounderHeifer: ManagementPeriods = None
-    BackgrounderSteer: ManagementPeriods = None
-
-    component_types: ClassVar = Union[
-        beef.Bulls,
-        beef.ReplacementHeifers,
-        beef.Cows,
-        beef.Calves,
-        beef.FinishingHeifers,
-        beef.FinishingSteers,
-        beef.BackgrounderHeifer,
-        beef.BackgrounderSteer]
+    Bulls: list[BeefManagementPeriod] = None
+    ReplacementHeifers: list[BeefManagementPeriod] = None
+    Cows: list[BeefManagementPeriod] = None
+    Calves: list[BeefManagementPeriod] = None
+    FinishingHeifers: list[BeefManagementPeriod] = None
+    FinishingSteers: list[BeefManagementPeriod] = None
+    BackgrounderHeifer: list[BeefManagementPeriod] = None
+    BackgrounderSteer: list[BeefManagementPeriod] = None
 
     def filter_inputs(self) -> list[list[str]]:
         return self._filter_inputs(animal_groups=[
@@ -205,7 +246,7 @@ class BeefCattleInput(AnimalInputBase):
     @staticmethod
     def map_component(
             component_name: str
-    ) -> component_types:
+    ) -> BeefCattleComponent:
 
         match component_name:
             case 'Bulls':
@@ -233,9 +274,9 @@ class BeefCattleInput(AnimalInputBase):
     def _create_component(
             province: CanadianProvince,
             soil_texture: SoilTexture,
-            component_class: [component_types],
+            component_class: Type[BeefCattleComponent],
             management_period: BeefManagementPeriod
-    ) -> component_types:
+    ) -> BeefCattleComponent:
         return component_class(
             management_period_name=management_period.name,
             management_period_start_date=management_period.start_date,
@@ -267,22 +308,17 @@ class BeefCattleInput(AnimalInputBase):
         )
 
 
+# region Dairy Inputs
 class DairyCattleInput(AnimalInputBase):
-    Heifers: ManagementPeriods = None
-    LactatingCow: ManagementPeriods = None
-    Calves: ManagementPeriods = None
-    DryCow: ManagementPeriods = None
-
-    component_types: ClassVar = Union[
-        dairy.DairyHeifers,
-        dairy.DairyLactatingCow,
-        dairy.DairyCalves,
-        dairy.DairyDryCow]
+    Heifers: list[DairyManagementPeriod] = None
+    LactatingCow: list[DairyManagementPeriod] = None
+    Calves: list[DairyManagementPeriod] = None
+    DryCow: list[DairyManagementPeriod] = None
 
     @staticmethod
     def map_component(
             component_name: str
-    ) -> component_types:
+    ) -> DairyCattleComponent:
 
         match component_name:
             case 'Heifers':
@@ -307,14 +343,14 @@ class DairyCattleInput(AnimalInputBase):
     def _create_component(
             province: CanadianProvince,
             soil_texture: SoilTexture,
-            component_class: [component_types],
+            component_class: Type[DairyCattleComponent],
             management_period: DairyManagementPeriod
-    ) -> component_types:
+    ) -> DairyCattleComponent:
         return component_class(
             management_period_name=management_period.name,
+            group_pairing_number=management_period.group_pairing_number,
             management_period_start_date=management_period.start_date,
             management_period_days=management_period.days,
-            group_pairing_number=management_period.group_pairing_number,
             number_of_animals=management_period.number_of_animals,
             production_stage=management_period.production_stage,
             number_of_young_animals=management_period.number_of_young_animals,
@@ -339,22 +375,17 @@ class DairyCattleInput(AnimalInputBase):
         )
 
 
+# region Sheeps Inputs
 class SheepFlockInput(AnimalInputBase):
-    SheepFeedlot: ManagementPeriods = None
-    Rams: ManagementPeriods = None
-    Ewes: ManagementPeriods = None
-    Lambs: ManagementPeriods = None
-
-    component_types: ClassVar = Union[
-        sheep.SheepFeedlot,
-        sheep.Rams,
-        sheep.Ewes,
-        sheep.Lambs]
+    SheepFeedlot: list[SheepManagementPeriod] = None
+    Rams: list[SheepManagementPeriod] = None
+    Ewes: list[SheepManagementPeriod] = None
+    Lambs: list[SheepManagementPeriod] = None
 
     @staticmethod
     def map_component(
             component_name: str
-    ) -> component_types:
+    ) -> SheepFlockComponent:
 
         match component_name:
             case 'SheepFeedlot':
@@ -381,14 +412,14 @@ class SheepFlockInput(AnimalInputBase):
     def _create_component(
             province: CanadianProvince,
             soil_texture: SoilTexture,
-            component_class: [component_types],
+            component_class: Type[SheepFlockComponent],
             management_period: SheepManagementPeriod
-    ) -> component_types:
+    ) -> SheepFlockComponent:
         return component_class(
             management_period_name=management_period.name,
+            group_pairing_number=management_period.group_pairing_number,
             management_period_start_date=management_period.start_date,
             management_period_days=management_period.days,
-            group_pairing_number=management_period.group_pairing_number,
             number_of_animals=management_period.number_of_animals,
             production_stage=management_period.production_stage,
             number_of_young_animals=management_period.number_of_young_animals,
@@ -412,6 +443,7 @@ class SheepFlockInput(AnimalInputBase):
         )
 
 
+# region Fields Inputs
 class FieldAnnualData(BaseModel):
     name: str = Field(min_length=1)
     field_area: PositiveFloat
@@ -434,7 +466,22 @@ class FieldAnnualData(BaseModel):
     manure_location_source_type: ManureLocationSourceType = ManureLocationSourceType.NotSelected
 
     year_in_perennial_stand: int = None
-    field_system_component_guid: UUID = None
+
+    # Unique identifier for perennial stand. All years in the same stand must share this UUID.
+    field_system_component_guid: UUID = Field(
+        default=None,
+        description=(
+            "Unique identifier (UUID) for the perennial stand. "
+            "Used to group all years of a given stand together. "
+            "Each year within the same stand must share this same identifier. "
+            "If omitted or inconsistent, Holos will not correctly associate the years. "
+            "Corresponds to PerrenialStandID in HolosCLI CLI_Input_FIle_Example.md. "
+            "https://github.com/holos-aafc/Holos/blob/main/H.Content/Documentation/CLI%20Input%20File%20Example.  "
+            "Example: '00000000-0000-0000-0000-000000000000'."
+        ),
+        example="00000000-0000-0000-0000-000000000000"
+    ),
+
     current_year: int = None
     relative_biomass_information_data: RelativeBiomassInformationData = None
     province: CanadianProvince = None
@@ -459,7 +506,7 @@ class FieldsInput(BaseModel):
     table_7: ClassVar = parse_table_7()
 
     @property
-    def fields_data(self) -> Generator[list[FieldAnnualData]] | Generator:
+    def fields_data(self) -> Generator[list[FieldAnnualData], None, None]:
         if self.fields is None:
             return iter(())
         else:

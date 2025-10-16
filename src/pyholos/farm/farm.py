@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Optional
 
 from pandas import DataFrame
 
@@ -16,10 +16,10 @@ class Farm:
     def __init__(
             self,
             farm_settings: ParamsFarmSettings,
-            beef_cattle_data: BeefCattleInput = None,
-            dairy_cattle_data: DairyCattleInput = None,
-            sheep_flock_data: SheepFlockInput = None,
-            fields_data: FieldsInput = None,
+            beef_cattle_data: Optional[BeefCattleInput] = None,
+            dairy_cattle_data: Optional[DairyCattleInput] = None,
+            sheep_flock_data: Optional[SheepFlockInput] = None,
+            fields_data: Optional[FieldsInput] = None,
     ):
         self.farm_settings = farm_settings
         self.beef = beef_cattle_data
@@ -67,10 +67,10 @@ def create_farm(
         latitude: float,
         longitude: float,
         weather_summary: WeatherSummary,
-        beef_cattle_data: BeefCattleInput = None,
-        dairy_cattle_data: DairyCattleInput = None,
-        sheep_flock_data: SheepFlockInput = None,
-        fields_data: FieldsInput = None,
+        beef_cattle_data: Optional[BeefCattleInput] = None,
+        dairy_cattle_data: Optional[DairyCattleInput] = None,
+        sheep_flock_data: Optional[SheepFlockInput] = None,
+        fields_data: Optional[FieldsInput] = None,
 ) -> Farm:
     farm = Farm(
         farm_settings=ParamsFarmSettings(
