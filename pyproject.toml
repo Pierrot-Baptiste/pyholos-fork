@@ -23,6 +23,8 @@ dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools]
 include-package-data = true
+package-dir = { "" = "src" }
+packages = ["pyholos"]
 
 [tool.setuptools.package-data]
 "pyholos" = ["resources/**/*"]
