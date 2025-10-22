@@ -4,9 +4,12 @@ from typing import Any
 from pyholos.common import HolosVar
 from pyholos.core_constants import CoreConstants
 from pyholos.defaults import Defaults
+from pyholos.defaults_enums import DefaultEnums
 from pyholos.farm.enums import (CarbonModellingStrategies,
                                 ChosenClimateAcquisition,
-                                YieldAssignmentMethod)
+                                YieldAssignmentMethod,
+                                ResidueInputCalculationMethod,
+                                SoilDataAcquisitionMethod)
 from pyholos.soil import set_soil_properties
 
 
@@ -39,6 +42,12 @@ class ParamsGeneral(ParamGeneric):
             polygon_id: int,
             latitude: float,
             longitude: float,
+            yield_assignment_method: YieldAssignmentMethod = YieldAssignmentMethod.SmallAreaData,
+            path_to_custom_yield_input_file: str = '',
+            use_custom_starting_soil_organic_carbon_value: bool = False,
+            starting_soc_value: float = 0,
+            residue_input_calculation_method: ResidueInputCalculationMethod = ResidueInputCalculationMethod.Default,
+            soil_data_acquisition_method: SoilDataAcquisitionMethod = SoilDataAcquisitionMethod.Default,
             carbon_concentration: float = 0.45,
             emergence_day: int = 141,
             ripening_day: int = 197,
@@ -49,14 +58,28 @@ class ParamsGeneral(ParamGeneric):
             moisture_response_function_at_saturation: float = 0.42,
             moisture_response_function_at_wilting_point: float = 0.18,
             **kwargs
-    ):
+            ):
         super().__init__(title="General")
 
         self.yield_assignment_method = FarmSettingsVar(
-            name="Yield Assignment Method", value=YieldAssignmentMethod.SmallAreaData.name)
+            name="Yield Assignment Method", value=yield_assignment_method)
+        self.path_to_custom_yield_input_file = FarmSettingsVar(
+            name="Path To Custom Yield Input File", value=path_to_custom_yield_input_file
+        )
         self.polygon_number = FarmSettingsVar(name="Polygon Number", value=polygon_id)
         self.latitude = FarmSettingsVar(name="Latitude", value=latitude)
         self.Longitude = FarmSettingsVar(name="Longitude", value=longitude)
+        self.use_custom_starting_soil_organic_carbon_value = FarmSettingsVar(
+            name="Use Custom Starting Soil Organic Carbon Value",
+            value=use_custom_starting_soil_organic_carbon_value
+        )
+        self.starting_soc_value = FarmSettingsVar(name="Starting SOC Value", value=starting_soc_value)
+        self.residue_input_calculation_method = FarmSettingsVar(
+            name="Residue Input Calculation Method", value=residue_input_calculation_method
+        )
+        self.soil_data_acquisition_method = FarmSettingsVar(
+            name="Soil Data Acquisition Method", value=soil_data_acquisition_method
+        )
         self.carbon_concentration = FarmSettingsVar(name="Carbon Concentration  (kg kg^-1)", value=carbon_concentration)
         self.emergence_day = FarmSettingsVar(name="Emergence Day", value=emergence_day)
         self.ripening_day = FarmSettingsVar(name="Ripening Day", value=ripening_day)
@@ -194,7 +217,6 @@ class ParamsRangeland(ParamGeneric):
 class ParamsFodderCorn(ParamGeneric):
     def __init__(
             self,
-            run_in_period_years: int,
             percentage_of_product_returned_to_soil_for_fodder_corn: int | float = 35,
             percentage_of_roots_returned_to_soil_for_fodder_corn: int | float = 100,
             decomposition_rate_constant_young_pool: float = 0.8,
@@ -206,6 +228,8 @@ class ParamsFodderCorn(ParamGeneric):
             fraction_of_n_lost_by_volatilization: float = 0.21,
             microbe_death: float = 0.2,
             denitrification: float = 0.5,
+            carbon_modelling_strategy: CarbonModellingStrategies = CarbonModellingStrategies.ICBM,
+            run_in_period_years: int = 15,
             **kwargs
     ):
         super().__init__(title="Fodder Corn")
@@ -244,7 +268,7 @@ class ParamsFodderCorn(ParamGeneric):
             value=denitrification)
         self.carbon_modelling_strategy = FarmSettingsVar(
             name="Carbon modelling strategy",
-            value=CarbonModellingStrategies.ICBM.name)
+            value=carbon_modelling_strategy)
         self.run_in_period_years = FarmSettingsVar(
             name="Run In Period Years",
             value=run_in_period_years)
@@ -257,7 +281,8 @@ class ParamsIcbm(ParamGeneric):
             humification_coefficient_below_ground: float = 0.3,
             humification_coefficient_manure: float = 0.31,
             climate_filename: str = "climate.csv",
-            climate_data_acquisition: str = "NASA",
+            climate_data_acquisition: ChosenClimateAcquisition = ChosenClimateAcquisition.NASA,
+            use_climate_parameter_instead_of_management_factor: bool = True,
             enable_carbon_modelling: bool = True,
             **kwargs
     ):
@@ -279,7 +304,7 @@ class ParamsIcbm(ParamGeneric):
             value=climate_data_acquisition)
         self.use_climate_parameter_instead_of_management_factor = FarmSettingsVar(
             name="Use climate parameter instead of management factor",
-            value=True)
+            value=use_climate_parameter_instead_of_management_factor)
         self.enable_carbon_modelling = FarmSettingsVar(
             name="Enable Carbon Modelling",
             value=enable_carbon_modelling)
@@ -349,6 +374,7 @@ class ParamsSoil(ParamGeneric):
 class ParamsFarmSettings:
     def __init__(
             self,
+            # Required parameters
             year: int,
             latitude: float,
             longitude: float,
@@ -356,8 +382,13 @@ class ParamsFarmSettings:
             monthly_potential_evapotranspiration: list,
             monthly_temperature: list,
 
-            run_in_period_years: int = Defaults.DefaultRunInPeriod,
-
+            # General parameters
+            yield_assignment_method: YieldAssignmentMethod = DefaultEnums.YieldAssignmentMethod,
+            path_to_custom_yield_input_file: str = Defaults.PathToCustomYieldInputFile,
+            use_custom_starting_soil_organic_carbon_value: bool = Defaults.UseCustomStartingSoilOrganicCarbonValue,
+            starting_soc_value: float = Defaults.StartingSOCValue,
+            residue_input_calculation_method: ResidueInputCalculationMethod = DefaultEnums.ResidueInputCalculationMethod,
+            soil_data_acquisition_method: SoilDataAcquisitionMethod = DefaultEnums.SoilDataAcquisitionMethod,
             carbon_concentration: float = CoreConstants.CarbonConcentration,
             emergence_day: int = Defaults.EmergenceDay,
             ripening_day: int = Defaults.RipeningDay,
@@ -368,28 +399,35 @@ class ParamsFarmSettings:
             moisture_response_function_at_saturation: float = Defaults.MoistureResponseFunctionAtSaturation,
             moisture_response_function_at_wilting_point: float = Defaults.MoistureResponseFunctionAtWiltingPoint,
 
+            # Annual Crops parameters
             percentage_of_product_returned_to_soil_for_annuals: int | float = Defaults.PercentageOfProductReturnedToSoilForAnnuals,
             percentage_of_straw_returned_to_soil_for_annuals: int | float = Defaults.PercentageOfStrawReturnedToSoilForAnnuals,
             percentage_of_roots_returned_to_soil_for_annuals: int | float = Defaults.PercentageOfRootsReturnedToSoilForAnnuals,
 
+            # Silage Crops parameters
             percentage_of_product_yield_returned_to_soil_for_silage_crops: int | float = Defaults.PercentageOfProductYieldReturnedToSoilForSilageCrops,
             percentage_of_roots_returned_to_soil_for_silage_crops: int | float = Defaults.PercentageOfRootsReturnedToSoilForSilageCrops,
 
+            # Cover Crops parameters
             percentage_of_product_yield_returned_to_soil_for_cover_crops: int | float = Defaults.PercentageOfProductYieldReturnedToSoilForCoverCrops,
             percentage_of_product_yield_returned_to_soil_for_cover_crops_forage: int | float = Defaults.PercentageOfProductYieldReturnedToSoilForCoverCropsForage,
             percentage_of_product_yield_returned_to_soil_for_cover_crops_produce: int | float = Defaults.PercentageOfProductYieldReturnedToSoilForCoverCropsProduce,
             percentage_of_straw_returned_to_soil_for_cover_crops: int | float = Defaults.PercentageOfStrawReturnedToSoilForCoverCrops,
             percentage_of_roots_returned_to_soil_for_cover_crops: int | float = Defaults.PercentageOfRootsReturnedToSoilForCoverCrops,
 
+            # Root Crops parameters
             percentage_of_product_returned_to_soil_for_root_crops: int | float = Defaults.PercentageOfProductReturnedToSoilForRootCrops,
             percentage_of_straw_returned_to_soil_for_root_crops: int | float = Defaults.PercentageOfStrawReturnedToSoilForRootCrops,
 
+            # Perennial Crops parameters
             percentage_of_product_returned_to_soil_for_perennials: int | float = Defaults.PercentageOfProductReturnedToSoilForPerennials,
             percentage_of_roots_returned_to_soil_for_perennials: int | float = Defaults.PercentageOfRootsReturnedToSoilForPerennials,
 
+            # Rangeland parameters
             percentage_of_product_returned_to_soil_for_rangeland_due_to_harvest_loss: int | float = Defaults.PercentageOfProductReturnedToSoilForRangelandDueToHarvestLoss,
             percentage_of_roots_returned_to_soil_for_rangeland: int | float = Defaults.PercentageOfRootsReturnedToSoilForRangeland,
 
+            # Fodder Crops parameters
             percentage_of_product_returned_to_soil_for_fodder_corn: int | float = Defaults.PercentageOfProductReturnedToSoilForFodderCorn,
             percentage_of_roots_returned_to_soil_for_fodder_corn: int | float = Defaults.PercentageOfRootsReturnedToSoilForFodderCorn,
             decomposition_rate_constant_young_pool: float = Defaults.DecompositionRateConstantYoungPool,
@@ -401,77 +439,100 @@ class ParamsFarmSettings:
             fraction_of_n_lost_by_volatilization: float = Defaults.FractionOfNLostByVolatilization,
             microbe_death: float = Defaults.MicrobeDeath,
             denitrification: float = Defaults.Denitrification,
+            carbon_modelling_strategy: CarbonModellingStrategies = DefaultEnums.CarbonModellingStrategies,
+            run_in_period_years: int = Defaults.DefaultRunInPeriod,
 
+            # ICBM/Climate parameters
             humification_coefficient_above_ground: float = Defaults.HumificationCoefficientAboveGround,
             humification_coefficient_below_ground: float = Defaults.HumificationCoefficientBelowGround,
             humification_coefficient_manure: float = Defaults.HumificationCoefficientManure,
-            climate_filename: str = "climate.csv",
-            climate_data_acquisition: str = ChosenClimateAcquisition.NASA.name,
-            enable_carbon_modelling: bool = True,
-    ):
+            climate_filename: str = Defaults.ClimateFilename,
+            climate_data_acquisition: ChosenClimateAcquisition = DefaultEnums.ChosenClimateAcquisition,
+            use_climate_parameter_instead_of_management_factor: bool = Defaults.UseClimateParameterInsteadOfManagementFactor,
+            enable_carbon_modelling: bool = Defaults.EnableCarbonModelling,
+            ):
         """
+        ParamsFarmSettings assembles all the necessary parameters to generate a Holos-compatible Farm.settings file
+        used for carbon and GHG modeling at the farm level.
+
+        This class organizes parameters into thematic blocks (General, Crop-specific, Climate, Soil, etc.) and
+        automatically distributes them to the corresponding section classes via `**kwargs`. It supports flexible
+        configuration while preserving the expected structure and order of the output file.
 
         Args:
-            year: year of observation
-            latitude: (decimal degrees) latitude of the farm centroid
-            longitude: (decimal degrees) longitude of the farm centroid
-            monthly_precipitation: (mm) precipitation sum for each month of the year
-            monthly_potential_evapotranspiration: (mm) potential precipitation sum for each month of the year
-            monthly_temperature: (mm) air temperature average for each month of the year
-            run_in_period_years: number of simulated years for carbon modelling
-            carbon_concentration: (kg kg-1) carbon concentration in soil
+            year (int): Year of soil observation.
+            latitude (float): Latitude of the farm centroid (decimal degrees).
+            longitude (float): Longitude of the farm centroid (decimal degrees).
+            monthly_precipitation (list): Monthly precipitation values (mm) for each month of the year.
+            monthly_potential_evapotranspiration (list): Monthly potential evapotranspiration values (mm).
+            monthly_temperature (list): Monthly average air temperature values (°C).
 
-            emergence_day:
-            ripening_day:
-            variance:
-            alfa:
-            decomposition_minimum_temperature:
-            decomposition_maximum_temperature:
-            moisture_response_function_at_saturation:
-            moisture_response_function_at_wilting_point:
+            yield_assignment_method (YieldAssignmentMethod): Method used to assign crop yield.
+            path_to_custom_yield_input_file (str): Path to a custom yield input file, if applicable.
+            use_custom_starting_soil_organic_carbon_value (bool): Whether to use a custom starting SOC value.
+            starting_soc_value (float): Initial soil organic carbon value.
+            residue_input_calculation_method (ResidueInputCalculationMethod): Method for calculating crop residue input.
+            soil_data_acquisition_method (SoilDataAcquisitionMethod): Method for acquiring soil data.
 
-            percentage_of_product_returned_to_soil_for_annuals: [0, 100] product returned to soil for annuals
-            percentage_of_straw_returned_to_soil_for_annuals: [0, 100] straw returned to soil for annuals
-            percentage_of_roots_returned_to_soil_for_annuals: [0, 100] roots returned to soil for annuals
-            percentage_of_product_yield_returned_to_soil_for_silage_crops: [0, 100] product returned to soil for silage corn
-            percentage_of_roots_returned_to_soil_for_silage_crops: [0, 100] roots returned to soil for silage corn
-            percentage_of_product_yield_returned_to_soil_for_cover_crops: [0, 100] product returned to soil for cover crops
-            percentage_of_product_yield_returned_to_soil_for_cover_crops_forage: [0, 100] product returned to soil for cover crops forage
-            percentage_of_product_yield_returned_to_soil_for_cover_crops_produce: [0, 100] product returned to soil for cover crops produce
-            percentage_of_straw_returned_to_soil_for_cover_crops: [0, 100] straw returned to soil for cover crops
-            percentage_of_roots_returned_to_soil_for_cover_crops: [0, 100] roots returned to soil for cover crops
-            percentage_of_product_returned_to_soil_for_root_crops: [0, 100] product returned to soil for root crops
-            percentage_of_straw_returned_to_soil_for_root_crops: [0, 100] straw returned to soil for root crops
-            percentage_of_product_returned_to_soil_for_perennials: [0, 100] product returned to soil for perennials
-            percentage_of_roots_returned_to_soil_for_perennials: [0, 100] roots returned to soil for perennials
-            percentage_of_product_returned_to_soil_for_rangeland_due_to_harvest_loss: [0, 100] product returned to soil for rangeland
-            percentage_of_roots_returned_to_soil_for_rangeland: [0, 100] product returned to soil for rangeland
-            percentage_of_product_returned_to_soil_for_fodder_corn: [0, 100] product returned to soil for fodder corn
-            percentage_of_roots_returned_to_soil_for_fodder_corn: [0, 100] roots returned to soil for fodder corn
+            carbon_concentration (float): Soil carbon concentration (kg/kg).
+            emergence_day (int): Julian day of crop emergence.
+            ripening_day (int): Julian day of crop ripening.
+            variance (float): Width of the crop growth distribution function.
+            alfa (float): Minimum water storage fraction at wilting point.
+            decomposition_minimum_temperature (float): Minimum temperature for decomposition (°C).
+            decomposition_maximum_temperature (float): Maximum temperature for decomposition (°C).
+            moisture_response_function_at_saturation (float): Moisture response at saturation.
+            moisture_response_function_at_wilting_point (float): Moisture response at wilting point.
 
-            decomposition_rate_constant_young_pool: (?) Decomposition Rate Constant Young Pool
-            decomposition_rate_constant_old_pool:
-            old_pool_carbon_n:
-            no_ratio:
+            percentage_of_product_returned_to_soil_for_annuals (float): Percentage of annual crop product returned to soil.
+            percentage_of_straw_returned_to_soil_for_annuals (float): Percentage of annual crop straw returned to soil.
+            percentage_of_roots_returned_to_soil_for_annuals (float): Percentage of annual crop roots returned to soil.
 
-            emission_factor_for_leaching_and_runoff: (kg(N2O-N) kg(N)-1) emission factor for leaching and runoff
-            emission_factor_for_volatilization: (kg(N2O-N) kg(N)-1) emission factor for volatilization
+            percentage_of_product_yield_returned_to_soil_for_silage_crops (float): Percentage of silage crop product returned to soil.
+            percentage_of_roots_returned_to_soil_for_silage_crops (float): Percentage of silage crop roots returned to soil.
 
-            fraction_of_n_lost_by_volatilization: (?) Fraction Of N Lost By Volatilization
-            microbe_death:
-            denitrification:
+            percentage_of_product_yield_returned_to_soil_for_cover_crops (float): Percentage of cover crop product returned to soil.
+            percentage_of_product_yield_returned_to_soil_for_cover_crops_forage (float): Percentage of forage cover crop product returned to soil.
+            percentage_of_product_yield_returned_to_soil_for_cover_crops_produce (float): Percentage of produce cover crop product returned to soil.
+            percentage_of_straw_returned_to_soil_for_cover_crops (float): Percentage of cover crop straw returned to soil.
+            percentage_of_roots_returned_to_soil_for_cover_crops (float): Percentage of cover crop roots returned to soil.
 
-            humification_coefficient_above_ground:
-            humification_coefficient_below_ground:
-            humification_coefficient_manure:
+            percentage_of_product_returned_to_soil_for_root_crops (float): Percentage of root crop product returned to soil.
+            percentage_of_straw_returned_to_soil_for_root_crops (float): Percentage of root crop straw returned to soil.
 
-            climate_filename: name of the file containing the climate data (e.g. "climate.csv")
-            climate_data_acquisition: name of the provider of climate data (e.g. "NASA")
-            enable_carbon_modelling: whether to enable carbon modelling with ICBM (default to True)
+            percentage_of_product_returned_to_soil_for_perennials (float): Percentage of perennial crop product returned to soil.
+            percentage_of_roots_returned_to_soil_for_perennials (float): Percentage of perennial
+
+            percentage_of_product_returned_to_soil_for_rangeland_due_to_harvest_loss (float): Percentage of rangeland product returned to soil due to harvest loss.
+            percentage_of_roots_returned_to_soil_for_rangeland (float): Percentage of rangeland roots returned to soil.
+
+            percentage_of_product_returned_to_soil_for_fodder_corn (float): Percentage of fodder corn product returned to soil.
+            percentage_of_roots_returned_to_soil_for_fodder_corn (float): Percentage of fodder corn roots returned to soil.
+            decomposition_rate_constant_young_pool (float): Decomposition rate constant for the young carbon pool.
+            decomposition_rate_constant_old_pool (float): Decomposition rate constant for the old carbon pool.
+            old_pool_carbon_n (float): Carbon content of the old carbon pool.
+            no_ratio (float): Nitrogen content of the old carbon pool.
+            emission_factor_for_leaching_and_runoff (float): Emission factor for leaching and runoff.
+            emission_factor_for_volatilization (float): Emission factor for volatilization.
+            fraction_of_n_lost_by_volatilization (float): Fraction of N lost by volatilization.
+            microbe_death (float): Microbe death rate.
+            denitrification (float): Denitrification rate.
+            carbon_modelling_strategy (CarbonModellingStrategies): Strategy used for carbon modeling (e.g., ICBM or IPCCTier2).
+            run_in_period_years (int): Number of simulation years for carbon modeling.
+
+            humification_coefficient_above_ground (float): Humification coefficient for above-ground biomass.
+            humification_coefficient_below_ground (float): Humification coefficient for below-ground biomass.
+            humification_coefficient_manure (float): Humification coefficient for manure.
+            climate_filename (str): Filename of the climate data CSV.
+            climate_data_acquisition (ChosenClimateAcquisition): Source of climate data (e.g., NASA, custom).
+            use_climate_parameter_instead_of_management_factor (bool): Whether to use climate parameters instead of management factors.
+            enable_carbon_modelling (bool): Whether to enable carbon modeling.
 
         Notes:
-            The carbon modelling strategy can be one of ["IPCCTier2", "ICBM"]. In this first version, this parameter is forced to "ICBM".
-
+            - Parameters are automatically passed to section classes using `**kwargs`.
+            - The order of sections in the output file is controlled by the order in which the attributes are defined
+              in this class.
+            - Default values are centralized in the `Defaults` and `DefaultEnums` modules for maintainability.
         """
 
         kwargs = {k: v for k, v in locals().items() if all([not k.startswith(('_', '__', 'self')), not callable(k)])}

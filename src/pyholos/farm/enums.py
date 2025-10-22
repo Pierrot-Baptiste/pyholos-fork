@@ -27,7 +27,7 @@ class YieldAssignmentMethod(StrEnum):
 
 
 class CarbonModellingStrategies(StrEnum):
-    """
+    """Algorithm to use for SOC modelisation
     Holos source code:
         https://github.com/holos-aafc/Holos/blob/768b3d8fe2565dad0ba01fb8490974f1047a114f/H.Core/Enumerations/CarbonModellingStrategies.cs#L11
     """
@@ -36,7 +36,7 @@ class CarbonModellingStrategies(StrEnum):
 
 
 class ChosenClimateAcquisition(StrEnum):
-    """
+    """Method for acquiring climate data.
     Holos source code:
         https://github.com/holos-aafc/Holos/blob/768b3d8fe2565dad0ba01fb8490974f1047a114f/H.Core/Models/Farm.cs#L36C1-L58C10
     """
@@ -52,3 +52,33 @@ class ChosenClimateAcquisition(StrEnum):
 
     InputFile = auto()
     """Used with the CLI where the user can specify default daily values in a custom CSV file"""
+
+
+class ResidueInputCalculationMethod(StrEnum):
+    """Method for compouting residue input
+    Holos source code:
+        https://github.com/holos-aafc/Holos/blob/main/H.Core/Enumerations/ResidueInputCalculationMethod.cs
+    """
+    Default = auto()
+    """Uses Holos default method to calculate residue input"""
+
+    ICBM = auto()
+    """Uses ICBM method to calculate residue input"""
+
+    IPCCTier2 = auto()
+    """Uses IPCC Tier 2 method to calculate residue input"""
+
+
+class SoilDataAcquisitionMethod(StrEnum):
+    """Method for acquiring soil data
+    Holos source code:
+        https://github.com/holos-aafc/Holos/blob/main/H.Core/Enumerations/SoilDataAcquisitionMethod.cs
+    """
+    Default = auto()
+    """Default (currently uses SLC method)"""
+
+    SLC = auto()
+    """Get data from SLC database according to polygon ID"""
+
+    Custom = auto()
+    """Read data from settings file"""

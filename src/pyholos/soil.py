@@ -417,7 +417,7 @@ def set_soil_properties(
 
     province = common2.CanadianProvince.get_name(abbreviation=dominant_component_properties['PROVINCE'])
     soil_great_group = common2.SoilGreatGroupNamesSlc.get_name(
-        abbreviation=soil_name_table['G_GROUP3']).replace(' ', '')
+        abbreviation=soil_name_table['G_GROUP3']).replace(' ', '').replace('-', '')
 
     return dict(
         id_polygon=id_polygon,

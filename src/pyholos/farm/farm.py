@@ -10,6 +10,11 @@ from pyholos.farm.farm_inputs import (BeefCattleInput, DairyCattleInput,
 from pyholos.farm.farm_settings import ParamsFarmSettings
 from pyholos.soil import (convert_soil_functional_category_name,
                           convert_soil_texture_name)
+from pyholos.farm.enums import (ChosenClimateAcquisition,
+                                SoilDataAcquisitionMethod,
+                                YieldAssignmentMethod,
+                                ResidueInputCalculationMethod,
+                                CarbonModellingStrategies)
 
 
 class Farm:
@@ -67,11 +72,15 @@ def create_farm(
         latitude: float,
         longitude: float,
         weather_summary: WeatherSummary,
+        climate_data_acquisition: ChosenClimateAcquisition = ChosenClimateAcquisition.NASA,
+        yield_assignment_method: YieldAssignmentMethod = YieldAssignmentMethod.SmallAreaData,
+        soil_data_acquisition_method: SoilDataAcquisitionMethod = SoilDataAcquisitionMethod.Default,
+        carbon_modelling_strategy: CarbonModellingStrategies = CarbonModellingStrategies.ICBM,
         beef_cattle_data: Optional[BeefCattleInput] = None,
         dairy_cattle_data: Optional[DairyCattleInput] = None,
         sheep_flock_data: Optional[SheepFlockInput] = None,
         fields_data: Optional[FieldsInput] = None,
-) -> Farm:
+        ) -> Farm:
     farm = Farm(
         farm_settings=ParamsFarmSettings(
             latitude=latitude,
@@ -79,7 +88,11 @@ def create_farm(
             year=weather_summary.year,
             monthly_precipitation=weather_summary.monthly_precipitation,
             monthly_potential_evapotranspiration=weather_summary.monthly_potential_evapotranspiration,
-            monthly_temperature=weather_summary.monthly_temperature)
+            monthly_temperature=weather_summary.monthly_temperature,
+            yield_assignment_method=yield_assignment_method,
+            soil_data_acquisition_method=soil_data_acquisition_method,
+            carbon_modelling_strategy=carbon_modelling_strategy,
+            climate_data_acquisition=climate_data_acquisition)
     )
 
     params_soil = farm.farm_settings.params_soil

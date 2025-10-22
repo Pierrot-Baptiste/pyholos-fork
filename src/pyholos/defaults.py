@@ -1,3 +1,4 @@
+# This script contains default values to use when instanciating a Farm with create_farm function
 from pyholos.core_constants import CoreConstants
 
 
@@ -114,3 +115,21 @@ class Defaults:
 
     MoistureResponseFunctionAtSaturation = 0.42
     """(mm3/mm3) soil volumetric water content at reference saturation"""
+
+    ClimateFilename = "climate_data.csv"
+    """Default name for climate data file"""
+
+    UseClimateParameterInsteadOfManagementFactor = True
+    """Whether to use climate parameter instead of management factor in ICBM model"""
+
+    PathToCustomYieldInputFile = ""
+    """Path to custom yield input file. Empty by default."""
+
+    UseCustomStartingSoilOrganicCarbonValue = False
+    """Whether to use a custom starting soil organic carbon value"""
+
+    StartingSOCValue = 0.0
+    """Custom starting soil organic carbon value"""
+
+    EnableCarbonModelling = True
+    """Whether to enable carbon modelling in farm settings"""
