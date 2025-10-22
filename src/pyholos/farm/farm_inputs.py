@@ -155,6 +155,19 @@ class DairyManagementPeriod(BaseModel):
     average_daily_gain: confloat(ge=0, allow_inf_nan=False) = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
+    indoor_barn_temperature: Optional[float | str] = "N/A"
+
+    @field_validator("indoor_barn_temperature", mode="before")
+    def validate_temperature(cls, value):
+        if value in (None, "", "N/A"):
+            return "N/A"
+        try:
+            float_val = float(value)
+            if not (-50 <= float_val <= 50):
+                raise ValueError("Temperature must be between -50 and 50.")
+            return float_val
+        except (TypeError, ValueError):
+            raise ValueError("indoor_barn_temperature must be a float or 'N/A'")
 
 
 class SheepManagementPeriod(BaseModel):
