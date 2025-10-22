@@ -1,10 +1,9 @@
 from datetime import date
-from typing import ClassVar, Generator, Union, Type
+from typing import ClassVar, Generator, Union, Type, Optional, Annotated
 from uuid import UUID, uuid4
 
 from pydantic import (BaseModel, Field, NonNegativeFloat, NonNegativeInt,
-                      PositiveFloat, PositiveInt, confloat, conint, conlist,
-                      field_validator)
+                      PositiveFloat, PositiveInt, field_validator)
 
 from pyholos.common2 import CanadianProvince
 from pyholos.components.animals import beef, dairy, sheep
@@ -85,8 +84,8 @@ ManagementPeriod = Union[
     ]
 ManagementPeriods = list[ManagementPeriod]
 
-TypeWaterData = confloat(strict=True, ge=0, allow_inf_nan=False)
-TypeTemperatureData = confloat(strict=True, allow_inf_nan=False)
+TypeWaterData = Annotated[float, Field(strict=True, ge=0, allow_inf_nan=False)]
+TypeTemperatureData = Annotated[float, Field(strict=True, allow_inf_nan=False)]
 
 
 # region Weather Inputs
@@ -96,63 +95,63 @@ class WeatherData(BaseModel):
     """
     spec_daily_data: ClassVar[dict[str, int]] = dict(min_length=365, max_length=366)
 
-    year: int = Field(gt=CoreConstants.MinimumYear)
-    precipitation: conlist(item_type=TypeWaterData, **spec_daily_data)
-    potential_evapotranspiration: conlist(item_type=TypeWaterData, **spec_daily_data)
-    temperature: conlist(item_type=TypeTemperatureData, **spec_daily_data)
+    year: Annotated[int, Field(gt=CoreConstants.MinimumYear)]
+    precipitation: Annotated[list[TypeWaterData], Field(**spec_daily_data)]
+    potential_evapotranspiration: Annotated[list[TypeWaterData], Field(**spec_daily_data)]
+    temperature: Annotated[list[TypeTemperatureData], Field(**spec_daily_data)]
 
 
 class WeatherSummary(BaseModel):
     spec_monthly_data: ClassVar[dict[str, int]] = dict(min_length=12, max_length=12)
 
-    year: int = Field(gt=1970)
+    year: Annotated[int, Field(gt=1970)]
     mean_annual_precipitation: TypeWaterData
     mean_annual_temperature: TypeTemperatureData
     mean_annual_evapotranspiration: TypeWaterData
     growing_season_precipitation: TypeWaterData
     growing_season_evapotranspiration: TypeWaterData
-    monthly_precipitation: conlist(item_type=TypeWaterData, **spec_monthly_data)
-    monthly_potential_evapotranspiration: conlist(item_type=TypeWaterData, **spec_monthly_data)
-    monthly_temperature: conlist(item_type=TypeTemperatureData, **spec_monthly_data)
+    monthly_precipitation: Annotated[list[TypeWaterData], Field(**spec_monthly_data)]
+    monthly_potential_evapotranspiration: Annotated[list[TypeWaterData], Field(**spec_monthly_data)]
+    monthly_temperature: Annotated[list[TypeTemperatureData], Field(**spec_monthly_data)]
 
 
 # region Management Periods
 class BeefManagementPeriod(BaseModel):
-    name: str = Field(min_length=1)
+    name: Annotated[str, Field(min_length=1)]
     start_date: date
-    days: conint(gt=0)
-    group_pairing_number: conint(ge=0)
-    number_of_animals: conint(ge=0)
+    days: Annotated[int, Field(gt=0)]
+    group_pairing_number: Annotated[int, Field(ge=0)]
+    number_of_animals: Annotated[int, Field(ge=0)]
     production_stage: ProductionStage
-    number_of_young_animals: conint(ge=0)
+    number_of_young_animals: Annotated[int, Field(ge=0)]
     is_milk_fed_only: bool
     diet: Diet
     housing_type: HousingType
     manure_handling_system: ManureStateType
     weather_summary: WeatherSummary
-    start_weight: confloat(ge=0, allow_inf_nan=False) = None
-    end_weight: confloat(ge=0, allow_inf_nan=False) = None
-    average_daily_gain: confloat(ge=0, allow_inf_nan=False) = None
+    start_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    end_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    average_daily_gain: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
 
 
 class DairyManagementPeriod(BaseModel):
-    name: str = Field(min_length=1)
+    name: Annotated[str, Field(min_length=1)]
     start_date: date
-    days: conint(gt=0)
-    group_pairing_number: conint(ge=0)
-    number_of_animals: conint(ge=0)
+    days: Annotated[int, Field(gt=0)]
+    group_pairing_number: Annotated[int, Field(ge=0)]
+    number_of_animals: Annotated[int, Field(ge=0)]
     production_stage: ProductionStage
-    number_of_young_animals: conint(ge=0)
+    number_of_young_animals: Annotated[int, Field(ge=0)]
     milk_data: Milk
     diet: Diet
     housing_type: HousingType
     manure_handling_system: ManureStateType
     weather_summary: WeatherSummary
-    start_weight: confloat(ge=0, allow_inf_nan=False) = None
-    end_weight: confloat(ge=0, allow_inf_nan=False) = None
-    average_daily_gain: confloat(ge=0, allow_inf_nan=False) = None
+    start_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    end_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    average_daily_gain: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
     indoor_barn_temperature: Optional[float | str] = "N/A"
@@ -171,20 +170,20 @@ class DairyManagementPeriod(BaseModel):
 
 
 class SheepManagementPeriod(BaseModel):
-    name: str = Field(min_length=1)
+    name: Annotated[str, Field(min_length=1)]
     start_date: date
-    days: conint(gt=0)
-    group_pairing_number: conint(ge=0)
-    number_of_animals: conint(ge=0)
+    days: Annotated[int, Field(gt=0)]
+    group_pairing_number: Annotated[int, Field(ge=0)]
+    number_of_animals: Annotated[int, Field(ge=0)]
     production_stage: ProductionStage
-    number_of_young_animals: conint(ge=0)
+    number_of_young_animals: Annotated[int, Field(ge=0)]
     diet: Diet
     housing_type: HousingType
     manure_handling_system: ManureStateType
     weather_summary: WeatherSummary
-    start_weight: confloat(ge=0, allow_inf_nan=False) = None
-    end_weight: confloat(ge=0, allow_inf_nan=False) = None
-    average_daily_gain: confloat(ge=0, allow_inf_nan=False) = None
+    start_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    end_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    average_daily_gain: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
 
@@ -380,6 +379,7 @@ class DairyCattleInput(AnimalInputBase):
             average_daily_gain=management_period.average_daily_gain,
             diet_additive_type=management_period.diet_additive_type,
             bedding_material_type=management_period.bedding_material_type,
+            indoor_barn_temperature=management_period.indoor_barn_temperature,
 
             manure_emission_factors=get_manure_emission_factors(
                 manure_state_type=management_period.manure_handling_system,
