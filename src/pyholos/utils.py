@@ -21,8 +21,9 @@ def read_holos_resource_table(
 ) -> DataFrame:
     return read_csv(path_file, sep=',', decimal='.', comment='#', **kwargs
                     ).replace({
-        'NotApplicable': CoreConstants.NotApplicable,
-        float('nan'): None})
+                        'NotApplicable': CoreConstants.NotApplicable,
+                        float('nan'): None
+                        })
 
 
 def get_local_args(kwargs: dict) -> dict:
@@ -30,7 +31,7 @@ def get_local_args(kwargs: dict) -> dict:
 
 
 def convert_camel_case_to_space_delimited(s: str) -> str:
-    return re.sub("([a-z])([A-Z])", r"\g<1> \g<2>", s)
+    return re.sub(r"([a-z])([A-Z])", r"\g<1> \g<2>", s)
 
 
 def concat_lists(*args) -> list:
@@ -59,10 +60,10 @@ def clean_string(
         input_string = input_string.replace(s, '')
 
     if is_remove_text_between_parentheses:
-        input_string = re.sub("[(].*?[)]", "", input_string)
+        input_string = re.sub(r"\(.*?\)", "", input_string)
 
     if is_remove_text_between_brackets:
-        input_string = re.sub("[[].*?[]]", "", input_string)
+        input_string = re.sub(r"\[.*?\]", "", input_string)
 
     return input_string
 
