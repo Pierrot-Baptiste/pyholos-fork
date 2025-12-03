@@ -141,7 +141,7 @@ class DairyManagementPeriod(BaseModel):
     start_date: date
     days: Annotated[int, Field(gt=0)]
     group_pairing_number: Annotated[int, Field(ge=0)]
-    number_of_animals: Annotated[int, Field(ge=0)]
+    number_of_animals: Annotated[float, Field(ge=0)]  # We need float to modelise average number of animals
     production_stage: ProductionStage
     number_of_young_animals: Annotated[int, Field(ge=0)]
     milk_data: Milk
