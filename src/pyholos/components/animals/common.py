@@ -863,10 +863,9 @@ class Bedding:
 
         if animal_type.is_dairy_cattle_type():
             # Currently, all housing types have same rates for bedding types
-            if any([
-                housing_type.is_tie_stall(),
-                housing_type.is_free_stall(),
-                housing_type == HousingType.dry_lot]):
+            if any([housing_type.is_tie_stall(),
+                    housing_type.is_free_stall(),
+                    housing_type == HousingType.dry_lot]):
                 if bedding_material_type == BeddingMaterialType.sand:
                     return 24.3
 
@@ -896,19 +895,17 @@ class Bedding:
                 return 0.79
 
         if animal_type.is_poultry_type():
-            if any([
-                bedding_material_type == BeddingMaterialType.sawdust,
-                bedding_material_type == BeddingMaterialType.straw,
-                bedding_material_type == BeddingMaterialType.shavings]):
+            if any([bedding_material_type == BeddingMaterialType.sawdust,
+                    bedding_material_type == BeddingMaterialType.straw,
+                    bedding_material_type == BeddingMaterialType.shavings]):
                 if animal_type == AnimalType.broilers:
                     return 0.0014
 
                 if animal_type == AnimalType.chicken_pullets:
                     return 0.0014
 
-                if any([
-                    animal_type == AnimalType.layers,
-                    animal_type == AnimalType.chicken_hens]):
+                if any([animal_type == AnimalType.layers,
+                        animal_type == AnimalType.chicken_hens]):
                     return 0.0028
 
                 if animal_type.is_turkey_type():
@@ -977,12 +974,15 @@ class Bedding:
 
         result = df[
             (df['BeddingMaterial'] == bedding_material_type.value) &
-            (df['AnimalType'] == animal_lookup_type.value)]
+            (df['AnimalType'] == animal_lookup_type.value)
+            ]
 
         if not result.empty:
             return result.iloc[0].to_dict()
         else:
-            # Trace.TraceError($"{nameof(Farm)}.{nameof(GetBeddingMaterialComposition)}: unable to return bedding material data for {animalType.GetDescription()}, and {beddingMaterialType.GetHashCode()}. Returning default value of 1.");
+            # Trace.TraceError($"{nameof(Farm)}.{nameof(GetBeddingMaterialComposition)}:
+            # unable to return bedding material data for {animalType.GetDescription()},
+            # and {beddingMaterialType.GetHashCode()}. Returning default value of 1.");
 
             # return new Table_30_Default_Bedding_Material_Composition_Data();
             return {k: None for k in result.columns}
