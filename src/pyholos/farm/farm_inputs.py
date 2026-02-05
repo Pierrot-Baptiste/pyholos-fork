@@ -502,7 +502,7 @@ class FieldAnnualData(BaseModel):
             "https://github.com/holos-aafc/Holos/blob/main/H.Content/Documentation/CLI%20Input%20File%20Example.  "
             "Example: '00000000-0000-0000-0000-000000000000'."
         ),
-        example="00000000-0000-0000-0000-000000000000"
+        examples=["00000000-0000-0000-0000-000000000000"]
     ),
 
     current_year: int = None

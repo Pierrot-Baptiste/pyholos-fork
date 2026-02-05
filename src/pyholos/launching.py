@@ -1,5 +1,6 @@
 import subprocess
 from pathlib import Path, PureWindowsPath
+from typing import Optional, Iterator
 
 from pyholos.config import PATH_HOLOS_CLI
 from pyholos.utils import print_holos_msg
@@ -7,11 +8,11 @@ from pyholos.utils import print_holos_msg
 
 def set_cmd(
         path_dir_farms: Path,
-        path_dir_outputs: Path = None,
-        name_farm_json: str = None,
-        name_dir_farms_json: str = None,
-        name_settings: str = None,
-        id_slc_polygon: int = None,
+        path_dir_outputs: Optional[Path] = None,
+        name_farm_json: Optional[str] = None,
+        name_dir_farms_json: Optional[str] = None,
+        name_settings: Optional[str] = None,
+        id_slc_polygon: Optional[int] = None,
 ) -> list[str]:
     cmd = [
         'cmd', '/c',
@@ -42,11 +43,11 @@ def set_cmd(
 
 def launch_holos(
         path_dir_farms: Path,
-        path_dir_outputs: Path = None,
-        name_farm_json: str = None,
-        name_dir_farms_json: str = None,
-        name_settings: str = None,
-        id_slc_polygon: int = None,
+        path_dir_outputs: Optional[Path] = None,
+        name_farm_json: Optional[str] = None,
+        name_dir_farms_json: Optional[str] = None,
+        name_settings: Optional[str] = None,
+        id_slc_polygon: Optional[int] = None,
         is_print_holos_messages: bool = False
 ) -> None:
     cmd = set_cmd(
@@ -65,6 +66,9 @@ def launch_holos(
         stderr=subprocess.PIPE,
         text=True)
 
+    assert process.stdin is not None
+    assert process.stdout is not None
+
     for msg in _get_cli_messages(p=process):
         print_holos_msg(is_print_message=is_print_holos_messages, holos_message=msg)
 
@@ -77,7 +81,8 @@ def launch_holos(
     pass
 
 
-def _get_cli_messages(p: subprocess.Popen) -> str:
+def _get_cli_messages(p: subprocess.Popen) -> Iterator[str]:
+    assert p.stdout is not None
     while True:
         # returns None while subprocess is running
         return_code = p.poll()

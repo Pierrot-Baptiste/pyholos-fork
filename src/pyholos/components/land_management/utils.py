@@ -1,3 +1,5 @@
+import pandas as pd
+
 from pyholos.common2 import CanadianProvince
 from pyholos.components.common import convert_province_name
 from pyholos.components.land_management.crop import (CropType,
@@ -42,9 +44,10 @@ class LoadedData:
             polygon_id: int,
             crop_type: CropType,
             province: CanadianProvince
-    ) -> float:
+    ) -> float | None:
         if crop_type.is_perennial():
-            # Small area yield table only has one perennial type 'tame hay'. Had discussion with team on 8/17/2021  and it was agreed
+            # Small area yield table only has one perennial type 'tame hay'.
+            # Had discussion with team on 8/17/2021  and it was agreed
             # that we would use tame hay yields as the default for all perennial types until better numbers were found
             lookup_crop_type = CropType.TamePasture
 
@@ -60,7 +63,14 @@ class LoadedData:
             lookup_crop_type = crop_type
 
         try:
-            res = self.table_small_yield_area.loc[(year, province.name, polygon_id), lookup_crop_type]
+            res = self.table_small_yield_area.at[(year, province.name, polygon_id), lookup_crop_type]
         except KeyError:
             res = None
-        return res
+
+        if res is None or pd.isna(res):
+            res = None
+
+        try:
+            return float(res)  # type: ignore[arg-type]
+        except (ValueError, TypeError):
+            return None

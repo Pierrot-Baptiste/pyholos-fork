@@ -63,7 +63,9 @@ def plot_farm_total_co2eq_emissions(
     )
 
     fig.tight_layout()
-    fig.savefig(path_dir_fig / f"co2eq_{df['Farm Name'].iloc[0]}_total.png")
+    fig.savefig(
+        str(path_dir_fig / f"co2eq_{df['Farm Name'].iloc[0]}_total.png")
+    )
     pass
 
 
@@ -88,14 +90,14 @@ def plot_farm_detailed_co2eq_emissions(
     )
 
     fig.tight_layout()
-    fig.savefig(path_dir_fig / f"co2eq_{df['Farm Name'].iloc[0]}_detailed.png")
+    fig.savefig(str(path_dir_fig / f"co2eq_{df['Farm Name'].iloc[0]}_detailed.png"))
     pass
 
 
 def plot_total_co2eq_emissions(
         ghg_data: DataFrame,
         path_dir_fig: Path,
-        farm_name: str | list[str] = None
+        farm_name: str | list[str] | None = None
 ) -> None:
     if farm_name is not None:
         farms = farm_name if isinstance(farm_name, list) else [farm_name]
@@ -149,7 +151,7 @@ def plot_farm_monthly_co2eq_emissions(
             simulated_ghg = values[col]
             ax.bar(simulated_months, simulated_ghg,
                    width=0.5,
-                   label=' '.join(group_name.split('_')[1:]),
+                   label=' '.join(str(group_name).split('_')[1:]),
                    bottom=[bottom[i - 1] for i in simulated_months])
             for month, ghg in zip(simulated_months, simulated_ghg):
                 bottom[month - 1] += ghg
@@ -160,5 +162,7 @@ def plot_farm_monthly_co2eq_emissions(
     axs[-1, 0].set_xlabel('month')
     axs[-1, 0].xaxis.set_label_coords(1.05, -0.15)
     fig.tight_layout()
-    fig.savefig(path_dir_fig / f"co2eq_{df['Farm Name'].iloc[0]}_monthly{'_percentage' if is_percentage else ''}.png")
+    fig.savefig(
+        str(path_dir_fig / f"co2eq_{df['Farm Name'].iloc[0]}_monthly{'_percentage' if is_percentage else ''}.png")
+    )
     pass
