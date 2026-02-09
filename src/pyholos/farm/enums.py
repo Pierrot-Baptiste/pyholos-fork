@@ -1,7 +1,9 @@
-from enum import StrEnum, auto
+from enum import auto
+
+from pyholos.utils import AutoNameEnum
 
 
-class YieldAssignmentMethod(StrEnum):
+class YieldAssignmentMethod(AutoNameEnum):
     """Used to lookup default yields for a particular year and crop type.
 
     Holos source code:
@@ -26,7 +28,7 @@ class YieldAssignmentMethod(StrEnum):
     """Use Small Area Data (SAD) yields (https://open.canada.ca/data/en/dataset/65f1cde1-95e0-4a1d-9a1a-c45b2f83a351)"""
 
 
-class CarbonModellingStrategies(StrEnum):
+class CarbonModellingStrategies(AutoNameEnum):
     """Algorithm to use for SOC modelisation
     Holos source code:
         https://github.com/holos-aafc/Holos/blob/768b3d8fe2565dad0ba01fb8490974f1047a114f/H.Core/Enumerations/CarbonModellingStrategies.cs#L11
@@ -35,7 +37,7 @@ class CarbonModellingStrategies(StrEnum):
     ICBM = auto()
 
 
-class ChosenClimateAcquisition(StrEnum):
+class ChosenClimateAcquisition(AutoNameEnum):
     """Method for acquiring climate data.
     Holos source code:
         https://github.com/holos-aafc/Holos/blob/768b3d8fe2565dad0ba01fb8490974f1047a114f/H.Core/Models/Farm.cs#L36C1-L58C10
@@ -54,7 +56,7 @@ class ChosenClimateAcquisition(StrEnum):
     """Used with the CLI where the user can specify default daily values in a custom CSV file"""
 
 
-class ResidueInputCalculationMethod(StrEnum):
+class ResidueInputCalculationMethod(AutoNameEnum):
     """Method for compouting residue input
     Holos source code:
         https://github.com/holos-aafc/Holos/blob/main/H.Core/Enumerations/ResidueInputCalculationMethod.cs
@@ -69,7 +71,7 @@ class ResidueInputCalculationMethod(StrEnum):
     """Uses IPCC Tier 2 method to calculate residue input"""
 
 
-class SoilDataAcquisitionMethod(StrEnum):
+class SoilDataAcquisitionMethod(AutoNameEnum):
     """Method for acquiring soil data
     Holos source code:
         https://github.com/holos-aafc/Holos/blob/main/H.Core/Enumerations/SoilDataAcquisitionMethod.cs
