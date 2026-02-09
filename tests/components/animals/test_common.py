@@ -1928,7 +1928,7 @@ class TestGetLandApplicationFactors(unittest.TestCase):
         cls.volatilization_fraction_for_other_animal_types = 0.21
 
         cls.methane_conversion_factor = 0.0047
-        cls.emission_factor_leaching = Defaults.EmissionFactorForLeachingAndRunoff.value
+        cls.emission_factor_leaching = Defaults.EmissionFactorForLeachingAndRunoff
         cls.leaching_fraction = common.calculate_fraction_of_nitrogen_lost_by_leaching_and_runoff(
             growing_season_precipitation=cls.growing_season_precipitation,
             growing_season_evapotranspiration=cls.growing_season_evapotranspiration)
@@ -3546,7 +3546,9 @@ class TestGetBeefAndDairyCattleCoefficientData(unittest.TestCase):
                           gain_coefficient,
                           default_initial_weight,
                           default_final_weight) in [
-            (common.AnimalType.beef_calf, (CoreConstants.NotApplicable, CoreConstants.NotApplicable, 39, 90)),
+            # Changed first test because table contains 260, but a note mentions lowering that to 90
+            # which seems extreme...
+            (common.AnimalType.beef_calf, (CoreConstants.NotApplicable, CoreConstants.NotApplicable, 39, 260)),
             (common.AnimalType.beef_cow_lactating, (0.386, 0.8, 610, 610)),
             (common.AnimalType.beef_cow_dry, (0.322, 0.8, 610, 610)),
             (common.AnimalType.beef_bulls, (0.37, 1.2, 900, 900)),

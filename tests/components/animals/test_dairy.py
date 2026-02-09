@@ -90,7 +90,7 @@ class MyTestCase(unittest.TestCase):
             production_stage=common.ProductionStage.gestating,
             number_of_young_animals=0,
             milk_data=common.Milk(
-                production_amount=common.get_average_milk_production_for_dairy_cows_value(
+                production=common.get_average_milk_production_for_dairy_cows_value(
                     year=2025,
                     province=self.province),
                 fat_content=3.71,

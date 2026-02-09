@@ -1,7 +1,7 @@
 from enum import auto
 from typing import ClassVar
 
-from pandas import DataFrame
+from pandas import DataFrame, to_numeric
 from pydantic import BaseModel, Field, NonNegativeFloat
 
 from pyholos import utils
@@ -18,7 +18,8 @@ from pyholos.utils import AutoNameEnum, read_holos_resource_table
 
 
 class DietAdditiveType(str, EnumGeneric):
-    """Holos source code: https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Enumerations/DietAdditiveType.cs#L6
+    """Holos source code:
+    https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Enumerations/DietAdditiveType.cs#L6
 
     """
     two_percent_fat = "TwoPercentFat"
@@ -75,7 +76,7 @@ class AnimalType(str, EnumGeneric):
     beef_calf = "BeefCalf"
     beef_cow_lactating = "BeefCowLactating"  # This also means 'regular' cows (i.e. non-lactating)
     beef_cow_dry = "BeefCowDry"
-    beef_finisher = "BeefFinisher"  # /// Also known as buffalo
+    beef_finisher = "BeefFinisher"  #/ Also known as buffalo
     bison = "Bison"
     swine_boar = "SwineBoar"
     broilers = "Broilers"
@@ -504,13 +505,19 @@ class Diet(BaseModel):
     """Diet composition data
 
         Args:
-            crude_protein_percentage: (-) percentage of crude protein in the diet dry matter (between 0 and 100)
-            forage_percentage: (-) percentage of forage in the diet dry matter (between 0 and 100)
-            total_digestible_nutrient_percentage: (-) percentage of total digestible nutrient in the diet dry matter (between 0 and 100)
-            ash_percentage: (-) percentage of ash in the diet dry matter (between 0 and 100)
-            starch_percentage: (-) percentage of starch in the diet dry matter (between 0 and 100)
+            crude_protein_percentage: (-) percentage of crude protein in the diet
+                dry matter (between 0 and 100)
+            forage_percentage: (-) percentage of forage in the diet dry matter
+                (between 0 and 100)
+            total_digestible_nutrient_percentage: (-) percentage of total digestible
+                nutrient in the diet dry matter (between 0 and 100)
+            ash_percentage: (-) percentage of ash in the diet dry matter
+                (between 0 and 100)
+            starch_percentage: (-) percentage of starch in the diet dry matter
+                (between 0 and 100)
             fat_percentage: (-) percentage of fat in the diet dry matter (between 0 and 100)
-            neutral_detergent_fiber_percentage: (-) percentage of neutral detergent fiber in the diet dry matter (between 0 and 100)
+            neutral_detergent_fiber_percentage: (-) percentage of neutral detergent fiber
+                in the diet dry matter (between 0 and 100)
             metabolizable_energy: (Mcal kg-1) metabolizable energy of the diet
         """
     specs: ClassVar = Field(NonNegativeFloat, ge=0, le=100)
@@ -544,13 +551,15 @@ class Diet(BaseModel):
             NEmf (MJ/kg DM) = [NEma (Mcal/kg DM) + NEga (Mcal/kg DM)] * 4.184 (conversion factor for Mcal to MJ)
 
         References:
-            Holos source code https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Feed/FeedIngredient.cs#L1319
+            Holos source code
+            https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Feed/FeedIngredient.cs#L1319
 
         """
         return (net_energy_for_maintenance + net_energy_for_growth) * 4.184
 
     def calc_dietary_net_energy_concentration_for_beef(self) -> float:
-        """Calculates the dietary net energy concentration of a beef cattle diet as a function of the metabolizable energy.
+        """Calculates the dietary net energy concentration of a beef cattle diet
+        as a function of the metabolizable energy.
 
         Returns:
             (MJ (kg DM)^-1) dietary net energy concentration
@@ -565,7 +574,8 @@ class Diet(BaseModel):
             net_energy_for_growth=self.metabolizable_energy * 0.7632 - 0.9276)
 
     def calc_dietary_net_energy_concentration_for_dairy(self) -> float:
-        """Calculates the dietary net energy concentration of a dairy cattle diet as a function of the metabolizable energy.
+        """Calculates the dietary net energy concentration of a dairy cattle diet
+        as a function of the metabolizable energy.
 
         Returns:
             (MJ (kg DM)^-1) dietary net energy concentration
@@ -655,7 +665,7 @@ class Diet(BaseModel):
     def calc_methane_conversion_factor(
             self,
             animal_type: AnimalType
-    ) -> float:
+    ) -> float | None:
         """Calculates the methane conversion factor based on the animal type.
 
         Args:
@@ -797,11 +807,11 @@ class Bedding:
     def __init__(
             self,
             housing_type: HousingType,
-            bedding_material_type: BeddingMaterialType | None,
+            bedding_material_type: BeddingMaterialType,
             animal_type: AnimalType,
-            total_carbon_kilograms_dry_matter_for_bedding: float = None,
-            total_nitrogen_kilograms_dry_matter_for_bedding: float = None,
-            moisture_content_of_bedding_material: float = None
+            total_carbon_kilograms_dry_matter_for_bedding: float | None = None,
+            total_nitrogen_kilograms_dry_matter_for_bedding: float | None = None,
+            moisture_content_of_bedding_material: float | None = None
     ):
         default_bedding_material_composition = self.get_bedding_material_composition(
             bedding_material_type=bedding_material_type,
@@ -1173,7 +1183,10 @@ class ManureStateType(str, EnumGeneric):
     liquid_with_natural_crust = "LiquidWithNaturalCrust"  # Also known as 'Liquid/Slurry with natural crust'
     liquid_with_solid_cover = "LiquidWithSolidCover"  # Also known as Liquid/Slurry with solid cover
     composted_in_vessel = "CompostedInVessel"  # (Swine system)
-    solid_storage_with_or_without_litter = "SolidStorageWithOrWithoutLitter"  # (Poultry system) No different than 'Solid Storage' but poultry solid storage needs the term 'litter' which is incorrect to use in the case of cattle 'Solid Storage' since there is no 'litter' only 'bedding' when considering the cattle system
+    solid_storage_with_or_without_litter = "SolidStorageWithOrWithoutLitter"
+    # (Poultry system) No different than 'Solid Storage' but poultry solid storage needs the term 'litter' which is
+    # incorrect to use in the case of cattle 'Solid Storage' since there is no 'litter' only 'bedding'
+    # when considering the cattle system
 
     # These methods correspond to the ManureStateTypeExtensions
     # https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Enumerations/ManureStateTypeExtensions.cs#L9
@@ -1239,18 +1252,25 @@ def get_fraction_of_organic_nitrogen_mineralized_data(
 
     Notes:
         1. Mineralization of organic N (fecal N and bedding N)
-        2. Solid manure composted for ≥ 10 months; data from Chai et al. (2014); these values are used for compost passive and compost intensive beef and dairy cattle manure
-        3. Solid manure stockpiled for ≥ 4 months; data from Chai et al. (2014); these values are also used for deep bedding beef and dairy cattle manure
-        4. FracurinaryN is the fraction of TAN in the liquid manure storage system (includes liquid/slurry with natural crust, liquid/slurry with no natural crust, liquid/slurry with solid cover and deep pit under barn).
-        5. Nitrification of TAN in liquid manure with natural crust (formed from manure, bedding, or waste forage) was considered since the natural crust can be assumed as similar to solid manure (stockpile) in terms of being aerobic. The N2O-N emission factor for liquid manure with a natural crust is 0.005 of total N IPCC (2006), which can be expressed as the TAN based EFs
-        6. Nitrification of TAN in liquid manure with no natural crust is assumed to be zero because of anaerobic conditions
+        2. Solid manure composted for ≥ 10 months; data from Chai et al. (2014); these values are used for compost
+            passive and compost intensive beef and dairy cattle manure
+        3. Solid manure stockpiled for ≥ 4 months; data from Chai et al. (2014); these values are also used for deep
+            bedding beef and dairy cattle manure
+        4. FracurinaryN is the fraction of TAN in the liquid manure storage system (includes liquid/slurry with natural
+            crust, liquid/slurry with no natural crust, liquid/slurry with solid cover and deep pit under barn).
+        5. Nitrification of TAN in liquid manure with natural crust (formed from manure, bedding, or waste forage) was
+            considered since the natural crust can be assumed as similar to solid manure (stockpile) in terms of being
+            aerobic. The N2O-N emission factor for liquid manure with a natural crust is 0.005 of total N IPCC (2006),
+            which can be expressed as the TAN based EFs
+        6. Nitrification of TAN in liquid manure with no natural crust is assumed to be zero because of anaerobic
+            conditions
         7. All nitrified TAN (nitrate-N) was assumed to be denitrified (no leaching, runoff) in liquid systems.
     """
     if animal_type.is_beef_cattle_type():
         # FracMineralized = Note 1.
         match state_type:
-            # // Solid-compost - beef
-            # // Note 2
+            # Solid-compost - beef
+            # Note 2
             case ManureStateType.compost_intensive | ManureStateType.compost_passive:
                 return FractionOfOrganicNitrogenMineralizedData(
                     fraction_immobilized=0,
@@ -1262,8 +1282,8 @@ def get_fraction_of_organic_nitrogen_mineralized_data(
                     n2_n=0.099,
                     n_leached=0.0575)
 
-            # // Solid-stockpiled - beef
-            # // Note 3
+            # Solid-stockpiled - beef
+            # Note 3
             case ManureStateType.deep_bedding | ManureStateType.solid_storage:
                 return FractionOfOrganicNitrogenMineralizedData(
                     fraction_immobilized=0,
@@ -1277,8 +1297,8 @@ def get_fraction_of_organic_nitrogen_mineralized_data(
                 )
     elif animal_type.is_dairy_cattle_type():
         match state_type:
-            # // Solid-compost - dairy
-            # // Note 2
+            # Solid-compost - dairy
+            # Note 2
             case ManureStateType.compost_intensive | ManureStateType.compost_passive:
                 return FractionOfOrganicNitrogenMineralizedData(
                     fraction_immobilized=0,
@@ -1290,8 +1310,8 @@ def get_fraction_of_organic_nitrogen_mineralized_data(
                     n2_n=0.111,
                     n_leached=0.13)
 
-            # // Solid-stockpiled - dairy
-            # // Note 3
+            # Solid-stockpiled - dairy
+            # Note 3
             case ManureStateType.deep_bedding | ManureStateType.solid_storage:
                 return FractionOfOrganicNitrogenMineralizedData(
                     fraction_immobilized=0,
@@ -1303,11 +1323,15 @@ def get_fraction_of_organic_nitrogen_mineralized_data(
                     n2_n=0.0555,
                     n_leached=0.065)
 
-    # // Liquid systems for both beef and dairy
+    # Liquid systems for both beef and dairy
     match state_type:
-        # // Liquid with natural crust
-        # // Note 5, 7
-        case ManureStateType.liquid_with_natural_crust | ManureStateType.liquid_with_solid_cover | ManureStateType.deep_pit:
+        # Liquid with natural crust
+        # Note 5, 7
+        case (
+            ManureStateType.liquid_with_natural_crust
+            | ManureStateType.liquid_with_solid_cover
+            | ManureStateType.deep_pit
+        ):
             return FractionOfOrganicNitrogenMineralizedData(
                 fraction_immobilized=0,
                 fraction_mineralized=0.1,
@@ -1318,8 +1342,8 @@ def get_fraction_of_organic_nitrogen_mineralized_data(
                 n2_n=0.015 / min(1., fraction_of_tan_in_liquid_manure_storage_system),
                 n_leached=0)
 
-        # // Liquid without natural crust
-        # // Note 6, 7
+        # Liquid without natural crust
+        # Note 6, 7
         case ManureStateType.liquid_no_crust:
             return FractionOfOrganicNitrogenMineralizedData(
                 fraction_immobilized=0,
@@ -1347,7 +1371,8 @@ def get_ammonia_emission_factor_for_storage_of_poultry_manure(
         (kg NH3-N kg^-1 TAN): default ammonia emission factor for housing
 
     References:
-        Holos source code: https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/DefaultAmmoniaEmissionFactorsForPoultryManureStorageProvider.cs#L7
+        Holos source code:
+        https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/DefaultAmmoniaEmissionFactorsForPoultryManureStorageProvider.cs#L7
 
     """
     if animal_type.is_chicken_type():
@@ -1376,7 +1401,8 @@ def get_ammonia_emission_factor_for_storage_of_beef_and_dairy_cattle_manure(
         (kg NH3-N kg^-1 TAN): default ammonia emission factor for housing
 
     References:
-        Holos source code: https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/Table_43_Beef_Dairy_Default_Emission_Factors_Provider.cs#L77
+        Holos source code:
+        https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/Table_43_Beef_Dairy_Default_Emission_Factors_Provider.cs#L77
 
     """
     # Footnote 1: Read for data reference information.
@@ -1416,7 +1442,8 @@ def get_emission_factor_for_volatilization_based_on_climate(
 
     Notes:
         In IPCC (2019), Table 11.3: Disaggregation by climate for EFvolatilization (based on long-term averages):
-        Wet climates occur in temperate and boreal zones where the ratio of annual precipitation (P) / potential evapotranspiration (PE) >1
+        Wet climates occur in temperate and boreal zones where the ratio of annual
+            precipitation (P) / potential evapotranspiration (PE) >1
         Dry climates occur in temperate and boreal zones where the ratio of annual P/PE <1
 
     Holos Source Code:
@@ -1486,7 +1513,12 @@ def get_methane_conversion_factor(
         manure_state_type == ManureStateType.solid
     ]):
         match climate_zone:
-            case ClimateZones.CoolTemperateMoist | ClimateZones.CoolTemperateDry | ClimateZones.BorealDry | ClimateZones.BorealMoist:
+            case (
+                ClimateZones.CoolTemperateMoist
+                | ClimateZones.CoolTemperateDry
+                | ClimateZones.BorealDry
+                | ClimateZones.BorealMoist
+            ):
                 return 0.02
 
             case ClimateZones.WarmTemperateDry | ClimateZones.WarmTemperateMoist:
@@ -1494,7 +1526,12 @@ def get_methane_conversion_factor(
 
     if manure_state_type == ManureStateType.compost_intensive:
         match climate_zone:
-            case ClimateZones.CoolTemperateMoist | ClimateZones.CoolTemperateDry | ClimateZones.BorealDry | ClimateZones.BorealMoist:
+            case (
+                ClimateZones.CoolTemperateMoist
+                | ClimateZones.CoolTemperateDry
+                | ClimateZones.BorealDry
+                | ClimateZones.BorealMoist
+            ):
                 return 0.005
 
             case ClimateZones.WarmTemperateDry | ClimateZones.WarmTemperateMoist:
@@ -1502,7 +1539,12 @@ def get_methane_conversion_factor(
 
     if manure_state_type == ManureStateType.compost_passive:
         match climate_zone:
-            case ClimateZones.CoolTemperateMoist | ClimateZones.CoolTemperateDry | ClimateZones.BorealDry | ClimateZones.BorealMoist:
+            case (
+                ClimateZones.CoolTemperateMoist
+                | ClimateZones.CoolTemperateDry
+                | ClimateZones.BorealDry
+                | ClimateZones.BorealMoist
+            ):
                 return 0.01
 
             case ClimateZones.WarmTemperateDry | ClimateZones.WarmTemperateMoist:
@@ -1523,12 +1565,24 @@ def get_methane_conversion_factor(
 
     if manure_state_type == ManureStateType.composted_in_vessel:
         match climate_zone:
-            case ClimateZones.CoolTemperateMoist | ClimateZones.CoolTemperateDry | ClimateZones.BorealDry | ClimateZones.BorealMoist | ClimateZones.WarmTemperateDry | ClimateZones.WarmTemperateMoist:
+            case (
+                ClimateZones.CoolTemperateMoist
+                | ClimateZones.CoolTemperateDry
+                | ClimateZones.BorealDry
+                | ClimateZones.BorealMoist
+                | ClimateZones.WarmTemperateDry
+                | ClimateZones.WarmTemperateMoist
+            ):
                 return 0.005
 
     if manure_state_type == ManureStateType.daily_spread:
         match climate_zone:
-            case ClimateZones.CoolTemperateMoist | ClimateZones.CoolTemperateDry | ClimateZones.BorealDry | ClimateZones.BorealMoist:
+            case (
+                ClimateZones.CoolTemperateMoist
+                | ClimateZones.CoolTemperateDry
+                | ClimateZones.BorealDry
+                | ClimateZones.BorealMoist
+            ):
                 return 0.001
 
             case ClimateZones.WarmTemperateDry | ClimateZones.WarmTemperateMoist:
@@ -1589,7 +1643,10 @@ def get_volatilization_fractions_from_land_applied_manure_data_for_swine_type(
         https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/Table%2070/Table_62_Volatilization_Fractions_From_Land_Applied_Swine_Manure_Provider.cs#L23
     """
     df = HolosTables.Table_62_Fractions_of_swine_N_volatilized
-    return df.iloc[(df['Year'] - year).abs().idxmin()][province.value.abbreviation]
+    return df.iloc[
+        int(
+            (df['Year'] - year).abs().idxmin()
+        )][province.value.abbreviation]
 
 
 def get_volatilization_fractions_from_land_applied_manure_data_for_dairy_cattle_type(
@@ -1609,7 +1666,7 @@ def get_volatilization_fractions_from_land_applied_manure_data_for_dairy_cattle_
         https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/Table%2069/Table_61_Volatilization_Fractions_From_Land_Applied_Dairy_Manure_Provider.cs#L48
     """
     df = HolosTables.Table_61_Fractions_of_dairy_cattle_N_volatilized
-    return df.iloc[(df['Year'] - year).abs().idxmin()][province.value.abbreviation]
+    return df.iloc[int((df['Year'] - year).abs().idxmin())][province.value.abbreviation]
 
 
 def get_volatilization_fraction_for_land_application(
@@ -1665,15 +1722,19 @@ def get_land_application_factors(
         province: Canadian Province class
         mean_annual_precipitation: (mm) mean annual precipitation
         mean_annual_evapotranspiration: (mm) mean annual potential evapotranspiration
-        growing_season_precipitation: (mm) total amount of precipitations during the growing season (e.g. may to oct.)
-        growing_season_evapotranspiration: (mm) total amount of evapotranspiration during the growing season (e.g. may to oct.)
+        growing_season_precipitation: (mm) total amount of precipitations during
+            the growing season (e.g. may to oct.)
+        growing_season_evapotranspiration: (mm) total amount of evapotranspiration
+            during the growing season (e.g. may to oct.)
         animal_type: animal type class
         year: year
         soil_texture: soil texture as set in Holos
 
     Holos Source Code:
-        (1) https://github.com/RamiALBASHA/Holos/blob/71638efd97c84c6ded45e342ce664477df6f803f/H.Core/Providers/Animals/Table_36_Livestock_Emission_Conversion_Factors_Provider.cs#L41
-        (2) https://github.com/holos-aafc/Holos/blob/267abf1066bb5494e5ec6a4085a85ab42dfa76c7/H.Core/Services/Initialization/Animals/AnimalInitializationService.Ammonia.cs#L55
+        (1)
+            https://github.com/RamiALBASHA/Holos/blob/71638efd97c84c6ded45e342ce664477df6f803f/H.Core/Providers/Animals/Table_36_Livestock_Emission_Conversion_Factors_Provider.cs#L41
+        (2)
+            https://github.com/holos-aafc/Holos/blob/267abf1066bb5494e5ec6a4085a85ab42dfa76c7/H.Core/Services/Initialization/Animals/AnimalInitializationService.Ammonia.cs#L55
     """
     region = get_region(province=province)
     climate_dependent_emission_factor_for_volatilization = get_emission_factor_for_volatilization_based_on_climate(
@@ -1736,8 +1797,10 @@ def get_manure_emission_factors(
         mean_annual_precipitation: (mm) mean annual precipitation
         mean_annual_temperature: (degrees Celsius) mean annual air temperature
         mean_annual_evapotranspiration: (mm) mean annual potential evapotranspiration
-        growing_season_precipitation: (mm) total amount of precipitations during the growing season (e.g. may to oct.)
-        growing_season_evapotranspiration: (mm) total amount of evapotranspiration during the growing season (e.g. may to oct.)
+        growing_season_precipitation: (mm) total amount of precipitations during
+            the growing season (e.g. may to oct.)
+        growing_season_evapotranspiration: (mm) total amount of evapotranspiration
+            during the growing season (e.g. may to oct.)
         animal_type: animal type class
         province: CanadianProvince class instance
         year: year
@@ -2084,7 +2147,9 @@ def get_manure_excretion_rate(
         if animal_type == AnimalType.chicken_hens:
             animal_type_lookup = AnimalType.layers
 
-    return _excretionRates.loc[animal_type_lookup, 'manure_excreted_rate']
+    value = _excretionRates.loc[animal_type_lookup, 'manure_excreted_rate']
+    num = to_numeric(value, errors="raise")
+    return num
 
 
 def convert_manure_state_type_name(name: str) -> ManureStateType:
@@ -2188,8 +2253,14 @@ def get_default_manure_composition_data(
         # Other animals have a value for animal group (Horses, Goats, etc.)
         animal_lookup_type = animal_type
 
+    rows = HolosTables.Table_6_Manure_Types_And_Default_Composition.loc[
+        [(animal_lookup_type, manure_state_type)]
+    ]  # always a dataframe, even if only one row is returned
+    row = rows.iloc[0]  # Always a Series
+    data = {str(k): to_numeric(v) for k, v in row.to_dict().items()}
     return ManureComposition(
-        **HolosTables.Table_6_Manure_Types_And_Default_Composition.loc[(animal_lookup_type, manure_state_type)])
+        **data
+    )
 
 
 def get_beef_and_dairy_cattle_coefficient_data(
@@ -2197,16 +2268,14 @@ def get_beef_and_dairy_cattle_coefficient_data(
 ) -> AnimalCoefficientData:
     df = HolosTables.Table_16_Livestock_Coefficients_BeefAndDairy_Cattle_Provider
 
-    if animal_type in df.index:
-        _df = df.loc[animal_type]
-        res = AnimalCoefficientData(
-            baseline_maintenance_coefficient=_df['BaselineMaintenanceCoefficient'],
-            gain_coefficient=_df['GainCoefficient'],
-            default_initial_weight=_df['DefaultInitialWeight'],
-            default_final_weight=_df['DefaultFinalWeight'])
-    else:
-        res = AnimalCoefficientData()
-    return res
+    if animal_type not in df.index:
+        return AnimalCoefficientData()
+    return AnimalCoefficientData(
+        baseline_maintenance_coefficient=to_numeric(df.at[animal_type, 'BaselineMaintenanceCoefficient']),
+        gain_coefficient=to_numeric(df.at[animal_type, 'GainCoefficient']),
+        default_initial_weight=to_numeric(df.at[animal_type, 'DefaultInitialWeight']),
+        default_final_weight=to_numeric(df.at[animal_type, 'DefaultFinalWeight'])
+    )
 
 
 def get_beef_and_dairy_cattle_feeding_activity_coefficient(
@@ -2256,7 +2325,8 @@ def get_average_milk_production_for_dairy_cows_value(
         (kg head-1 day-1): the average milk production value
 
     References:
-        Holos source code: https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/Table_21_Average_Milk_Production_Dairy_Cows_Provider.cs#L56
+        Holos source code:
+        https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/Table_21_Average_Milk_Production_Dairy_Cows_Provider.cs#L56
     """
     df = HolosTables.Table_21_Average_Milk_Production_For_Dairy_Cows_By_Province
     year_min = min(df.index)

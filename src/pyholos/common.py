@@ -47,7 +47,8 @@ def get_region(
         CanadianProvince.Manitoba,
         CanadianProvince.Saskatchewan,
         CanadianProvince.NorthwestTerritories,
-        CanadianProvince.Nunavut]:
+        CanadianProvince.Nunavut
+    ]:
 
         res = Region.WesternCanada
 
@@ -92,16 +93,18 @@ def get_climate_zone(
         ClimateZones object
 
     Notes:
-        For the determination of the methane conversion factor) MCF value, IPCC (2019) defines the different climate zones as follows:
+        For the determination of the methane conversion factor) MCF value, IPCC (2019)
+        defines the different climate zones as follows:
             1. Warm temperate moist: mean annual temperature (MAT) > 10 °C, P:PE >1;
             2. Warm temperate dry: MAT >10 °C, P:PE < 1;
             3. Cool temperate moist: MAT > 0 °C, P:PE >1;
             4. Cool temperate dry: MAT > 0 °C, P:PE <1;
             5. Boreal moist: MAT < 0 °C but some monthly temperatures > 10 °C, P:PE >1;
             6. Boreal dry: MAT < 0 °C but some monthly temperatures > 10 °C, P:PE <1.
-        The MAT for cool temperate moist, cool temperate dry, warm temperate moist and warm temperate dry were 4.6, 5.8, 13.9, 14.0, respectively.
-        For deep pit manure storage systems for dairy cattle and swine, an average storage duration of 1 month was assumed.
-        (Source: IPCC (2019), Table 10.17)
+        The MAT for cool temperate moist, cool temperate dry, warm temperate moist
+        and warm temperate dry were 4.6, 5.8, 13.9, 14.0, respectively.
+        For deep pit manure storage systems for dairy cattle and swine, an average
+        storage duration of 1 month was assumed. (Source: IPCC (2019), Table 10.17)
 
     Holos Source Code:
         https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Providers/Animals/Table_37_MCF_By_Climate_Livestock_MansureSystem_Provider.cs#L147

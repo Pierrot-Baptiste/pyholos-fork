@@ -11,8 +11,12 @@ from pyholos.core_constants import CoreConstants
 class AutoNameEnum(StrEnum):
     """Allows automatically setting the member value identical to the member name."""
 
-    def _generate_next_value_(self, start, count, last_values):
-        return self
+    @staticmethod
+    def _generate_next_value_(name, start, count, last_values) -> str:
+        """
+        Return the name as the value for the enum member.
+        """
+        return name
 
 
 def read_holos_resource_table(
@@ -49,7 +53,7 @@ def calc_average(values: Iterable[int | float]) -> float:
 
 def clean_string(
         input_string: str,
-        characters_to_remove: str | list[str] = (',', ' ', ';'),
+        characters_to_remove: str | tuple[str, ...] = (',', ' ', ';'),
         is_remove_text_between_parentheses: bool = True,
         is_remove_text_between_brackets: bool = True
 ) -> str:

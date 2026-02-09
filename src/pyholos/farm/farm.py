@@ -1,19 +1,26 @@
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 from pandas import DataFrame
 
 from pyholos.components.common import convert_province_name
-from pyholos.farm.farm_inputs import (BeefCattleInput, DairyCattleInput,
-                                      FieldsInput, SheepFlockInput,
-                                      WeatherSummary)
+from pyholos.farm.farm_inputs import (
+    BeefCattleInput,
+    DairyCattleInput,
+    FieldsInput,
+    SheepFlockInput,
+    WeatherSummary,
+    BeefCattleComponent,
+    DairyCattleComponent,
+    SheepFlockComponent,
+    CropViewItem,
+)
 from pyholos.farm.farm_settings import ParamsFarmSettings
 from pyholos.soil import (convert_soil_functional_category_name,
                           convert_soil_texture_name)
 from pyholos.farm.enums import (ChosenClimateAcquisition,
                                 SoilDataAcquisitionMethod,
                                 YieldAssignmentMethod,
-                                ResidueInputCalculationMethod,
                                 CarbonModellingStrategies)
 
 
@@ -21,10 +28,10 @@ class Farm:
     def __init__(
             self,
             farm_settings: ParamsFarmSettings,
-            beef_cattle_data: Optional[BeefCattleInput] = None,
-            dairy_cattle_data: Optional[DairyCattleInput] = None,
-            sheep_flock_data: Optional[SheepFlockInput] = None,
-            fields_data: Optional[FieldsInput] = None,
+            beef_cattle_data: Optional[list[list[BeefCattleComponent]]] = None,
+            dairy_cattle_data: Optional[list[list[DairyCattleComponent]]] = None,
+            sheep_flock_data: Optional[list[list[SheepFlockComponent]]] = None,
+            fields_data: Optional[list[list[CropViewItem]]] = None,
     ):
         self.farm_settings = farm_settings
         self.beef = beef_cattle_data
@@ -59,8 +66,8 @@ class Farm:
                 name_output_file = df['Name'].unique()[0]
                 df.to_csv(path_dir / f'{name_output_file}.csv', index=False)
 
-    def export_to_dict(self) -> dict:
-        res = {**self.farm_settings.export_to_dict()}
+    def export_to_dict(self) -> dict[str, list[str] | list[list[Any]]]:
+        res: dict[str, list[str] | list[list[Any]]] = {**self.farm_settings.export_to_dict()}
         for k, v in self._iter_over_animal_components():
             dir_name = self._set_dir_name(entry=k)
             res[dir_name] = [[v.to_dict() for v in component] for component in v]

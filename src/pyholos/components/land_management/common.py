@@ -1,3 +1,4 @@
+from typing import Hashable
 from enum import auto
 from pathlib import Path
 
@@ -33,7 +34,7 @@ class TillageType(AutoNameEnum):
 
 def convert_tillage_type_name(
         name: str
-) -> TillageType:
+) -> TillageType | None:
     match keep_alphabetical_characters(name=name):
         case "notill" | "nt":
             return TillageType.NoTill
@@ -41,8 +42,10 @@ def convert_tillage_type_name(
             return TillageType.Reduced
         case "intensive" | "it" | "conventional":
             return TillageType.Intensive
+        case "notselected" | "ns":
+            return TillageType.NotSelected
         case _:
-            pass
+            return None
 
 
 class HarvestMethod(AutoNameEnum):
@@ -116,11 +119,35 @@ class FertilizerBlends(AutoNameEnum):
 
 
 def read_energy_table(path_table: Path) -> DataFrame:
-    df = read_holos_resource_table(path_file=path_table, header=[0, 1, 2])
-    df.index = [convert_crop_type_name(s) for s in df.pop(('Unnamed: 0_level_0', 'Unnamed: 0_level_1', 'CROP'))]
+    df = read_holos_resource_table(
+        path_file=path_table,
+        header=[0, 1, 2]
+    )
+    index_col: Hashable = (
+        'Unnamed: 0_level_0',
+        'Unnamed: 0_level_1',
+        'CROP'
+    )
+
+    # Grab columns
+    idx = df[index_col]
+
+    # drop them from the dataframe
+    df.drop(columns=[index_col], inplace=True)
+
+    # set the index and convert the column names to a MultiIndex with the appropriate formatting
+    df.index = [convert_crop_type_name(s) for s in idx]
+
     df.columns = MultiIndex.from_tuples(
-        [(convert_province_name(p), convert_soil_functional_category_name(s), convert_tillage_type_name(t))
-         for p, s, t in df.columns])
+        [
+            (
+                convert_province_name(p),
+                convert_soil_functional_category_name(s),
+                convert_tillage_type_name(t)
+            )
+            for p, s, t in df.columns
+        ]
+    )
 
     return df
 
@@ -152,8 +179,10 @@ def get_energy_estimate(
         (GJ ha-1) energy estimate
 
     Holos source code:
-        Fuel: https://github.com/holos-aafc/Holos/blob/e6e79c3185b68999eaea1e68dbf77c89d1764b53/H.Core/Providers/Energy/Table_50_Fuel_Energy_Estimates_Provider.cs#L62
-        Fuel: https://github.com/holos-aafc/Holos/blob/e6e79c3185b68999eaea1e68dbf77c89d1764b53/H.Core/Providers/Energy/Table_51_Herbicide_Energy_Estimates_Provider.cs#L60
+        Fuel:
+        https://github.com/holos-aafc/Holos/blob/e6e79c3185b68999eaea1e68dbf77c89d1764b53/H.Core/Providers/Energy/Table_50_Fuel_Energy_Estimates_Provider.cs#L62
+        Fuel:
+        https://github.com/holos-aafc/Holos/blob/e6e79c3185b68999eaea1e68dbf77c89d1764b53/H.Core/Providers/Energy/Table_51_Herbicide_Energy_Estimates_Provider.cs#L60
     """
     soil_lookup_type = (
         SoilFunctionalCategory.EasternCanada if get_region(province=province) == Region.EasternCanada
@@ -164,7 +193,7 @@ def get_energy_estimate(
         crop_type = CropType.Fallow
 
     try:
-        res = data.loc[crop_type, (province, soil_lookup_type, tillage_type.value)]
+        res = data.loc[crop_type, (province, soil_lookup_type, tillage_type.value)]  # type: ignore[index]
     except KeyError:
         res = 0.
 

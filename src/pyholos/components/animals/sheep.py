@@ -1,5 +1,7 @@
 from datetime import date
-from enum import Enum
+from enum import StrEnum
+
+from pandas import to_numeric
 
 from pyholos import utils
 from pyholos.common import Component, HolosVar
@@ -54,12 +56,12 @@ def get_feeding_activity_coefficient(
             # return 0
 
 
-class GroupNames(Enum):
-    sheep_feedlot: str = "Sheep feedlot"
-    rams: str = "Rams"
-    ewes: str = "Ewes"
-    lambs: str = "Lambs"
-    lambs_and_ewes: str = "Lambs & ewes"
+class GroupNames(StrEnum):
+    sheep_feedlot = "Sheep feedlot"
+    rams = "Rams"
+    ewes = "Ewes"
+    lambs = "Lambs"
+    lambs_and_ewes = "Lambs & ewes"
 
 
 class AnimalCoefficientData:
@@ -177,18 +179,16 @@ class SheepBase(Component):
         animal_type = convert_animal_type_name(name=self.group_name.value)
         lookup_type = AnimalType.ram if animal_type == AnimalType.sheep_feedlot else animal_type
 
-        if lookup_type in df.index:
-            _df = df.loc[lookup_type]
-            res = AnimalCoefficientData(
-                maintenance_coefficient=_df['cf'],
-                coefficient_a=_df['a'],
-                coefficient_b=_df['b'],
-                initial_weight=_df['Initial Weight'],
-                final_weight=_df['Final Weight'],
-                wool_production=_df['Wool Production'])
-        else:
-            res = AnimalCoefficientData()
-        return res
+        if lookup_type not in df.index:
+            return AnimalCoefficientData()
+        return AnimalCoefficientData(
+            maintenance_coefficient=to_numeric(df.at[lookup_type, 'cf']),
+            coefficient_a=to_numeric(df.at[lookup_type, 'a']),
+            coefficient_b=to_numeric(df.at[lookup_type, 'b']),
+            initial_weight=to_numeric(df.at[lookup_type, 'Initial Weight']),
+            final_weight=to_numeric(df.at[lookup_type, 'Final Weight']),
+            wool_production=to_numeric(df.at[lookup_type, 'Wool Production'])
+        )
 
 
 class Sheep(SheepBase):
@@ -211,9 +211,9 @@ class Sheep(SheepBase):
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             manure_handling_system: ManureStateType,
 
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
 
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
@@ -269,8 +269,12 @@ class Sheep(SheepBase):
             animal_type=animal_type)
 
         self.user_defined_bedding_rate.value = bedding.user_defined_bedding_rate.value
-        self.total_carbon_kilograms_dry_matter_for_bedding.value = bedding.total_carbon_kilograms_dry_matter_for_bedding.value
-        self.total_nitrogen_kilograms_dry_matter_for_bedding.value = bedding.total_nitrogen_kilograms_dry_matter_for_bedding.value
+        self.total_carbon_kilograms_dry_matter_for_bedding.value = (
+            bedding.total_carbon_kilograms_dry_matter_for_bedding.value
+        )
+        self.total_nitrogen_kilograms_dry_matter_for_bedding.value = (
+            bedding.total_nitrogen_kilograms_dry_matter_for_bedding.value
+        )
         self.moisture_content_of_bedding_material.value = bedding.moisture_content_of_bedding_material.value
 
         self.methane_conversion_factor_of_manure.value = manure_emission_factors.MethaneConversionFactor
@@ -293,6 +297,7 @@ class Sheep(SheepBase):
 
 class SheepFeedlot(Sheep):
     animal_type = AnimalType.sheep_feedlot
+
     def __init__(
             self,
             management_period_name: str,
@@ -306,9 +311,9 @@ class SheepFeedlot(Sheep):
             housing_type: HousingType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             manure_handling_system: ManureStateType,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -325,6 +330,7 @@ class SheepFeedlot(Sheep):
 
 class Rams(Sheep):
     animal_type = AnimalType.ram
+
     def __init__(
             self,
             management_period_name: str,
@@ -338,9 +344,9 @@ class Rams(Sheep):
             housing_type: HousingType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             manure_handling_system: ManureStateType,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -372,9 +378,9 @@ class Ewes(Sheep):
             housing_type: HousingType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             manure_handling_system: ManureStateType,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):
@@ -404,9 +410,9 @@ class Lambs(Sheep):
             housing_type: HousingType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
             manure_handling_system: ManureStateType,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
     ):

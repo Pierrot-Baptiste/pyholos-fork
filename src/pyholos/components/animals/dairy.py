@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 
 from pyholos.common import Component, EnumGeneric, HolosVar
 from pyholos.components.animals.common import (
@@ -104,14 +105,17 @@ class DairyBase(Component):
 
         self.methane_producing_capacity_of_manure = HolosVar(name="Methane Producing Capacity Of Manure", value=None)
 
-        self._animal_coefficient_data: AnimalCoefficientData | None = None
+        self._animal_coefficient_data: AnimalCoefficientData = AnimalCoefficientData()
 
     def get_animal_coefficient_data(self):
-        self._animal_coefficient_data = get_beef_and_dairy_cattle_coefficient_data(animal_type=self.group_type.value)
+        self._animal_coefficient_data = get_beef_and_dairy_cattle_coefficient_data(
+            animal_type=self.group_type.value
+        )
 
     def set_feeding_activity_coefficient(self):
         self.activity_coefficient_of_feeding_situation.value = get_beef_and_dairy_cattle_feeding_activity_coefficient(
-            housing_type=self.housing_type.value)
+            housing_type=self.housing_type.value
+        )
 
 
 class Dairy(DairyBase):
@@ -123,7 +127,7 @@ class Dairy(DairyBase):
             group_pairing_number: int,
             management_period_start_date: date,
             management_period_days: int,
-            number_of_animals: int,
+            number_of_animals: float,
             production_stage: ProductionStage,
             number_of_young_animals: int,
             milk_data: Milk,
@@ -131,12 +135,12 @@ class Dairy(DairyBase):
             housing_type: HousingType,
             manure_handling_system: ManureStateType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
-            indoor_barn_temperature: float = None
+            indoor_barn_temperature: float | None = None
     ):
         """
 
@@ -171,16 +175,28 @@ class Dairy(DairyBase):
         self.number_of_young_animals.value = number_of_young_animals
         self.group_pairing_number.value = group_pairing_number
 
-        self.get_animal_coefficient_data()
-        self.start_weight.value = self._animal_coefficient_data.default_initial_weight if start_weight is None else start_weight
-        self.end_weight.value = self._animal_coefficient_data.default_final_weight if end_weight is None else end_weight
+        self._animal_coefficient_data = get_beef_and_dairy_cattle_coefficient_data(
+            animal_type=self.group_type.value
+        )
+
+        self.start_weight.value = (
+            self._animal_coefficient_data.default_initial_weight
+            if start_weight is None
+            else start_weight
+        )
+        self.end_weight.value = (
+            self._animal_coefficient_data.default_final_weight
+            if end_weight is None
+            else end_weight
+        )
         self.maintenance_coefficient.value = self._animal_coefficient_data.baseline_maintenance_coefficient
         self.gain_coefficient.value = self._animal_coefficient_data.gain_coefficient
 
         # Added to hopefully allow user to input ADG instead of weights
-        # TODO: to be tested if Holos C# uses ADG directly
         if average_daily_gain is None:
-            self.average_daily_gain.value = (self.end_weight.value - self.start_weight.value) / management_period_days
+            self.average_daily_gain.value = (
+                self.end_weight.value - self.start_weight.value
+                ) / management_period_days
         else:
             self.average_daily_gain.value = average_daily_gain
 
@@ -200,18 +216,25 @@ class Dairy(DairyBase):
         self.ndf.value = diet.neutral_detergent_fiber_percentage
 
         self.dietary_net_energy_concentration.value = diet.calc_dietary_net_energy_concentration_for_beef()
-        self.methane_conversion_factor_of_diet.value = diet.calc_methane_conversion_factor(animal_type=animal_type)
+        self.methane_conversion_factor_of_diet.value = diet.calc_methane_conversion_factor(
+            animal_type=animal_type
+        )
 
         self.housing_type.value = housing_type.value
 
         bedding = Bedding(
             housing_type=housing_type,
             bedding_material_type=bedding_material_type,
-            animal_type=animal_type)
+            animal_type=animal_type
+        )
 
         self.user_defined_bedding_rate.value = bedding.user_defined_bedding_rate.value
-        self.total_carbon_kilograms_dry_matter_for_bedding.value = bedding.total_carbon_kilograms_dry_matter_for_bedding.value
-        self.total_nitrogen_kilograms_dry_matter_for_bedding.value = bedding.total_nitrogen_kilograms_dry_matter_for_bedding.value
+        self.total_carbon_kilograms_dry_matter_for_bedding.value = (
+            bedding.total_carbon_kilograms_dry_matter_for_bedding.value
+        )
+        self.total_nitrogen_kilograms_dry_matter_for_bedding.value = (
+            bedding.total_nitrogen_kilograms_dry_matter_for_bedding.value
+        )
         self.moisture_content_of_bedding_material.value = bedding.moisture_content_of_bedding_material.value
         self.indoor_barn_temperature.value = indoor_barn_temperature
 
@@ -243,20 +266,20 @@ class DairyHeifers(Dairy):
             group_pairing_number: int,
             management_period_start_date: date,
             management_period_days: int,
-            number_of_animals: int,
+            number_of_animals: float,
             production_stage: ProductionStage,
-            number_of_young_animals: int,
+            number_of_young_animals: float,
             milk_data: Milk,
             diet: Diet,
             housing_type: HousingType,
             manure_handling_system: ManureStateType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
-            indoor_barn_temperature: float = None
+            indoor_barn_temperature: float | Literal["N/A"] = "N/A"
     ):
         super().__init__(
             group_name=self.animal_group.name,
@@ -274,7 +297,7 @@ class DairyLactatingCow(Dairy):
             group_pairing_number: int,
             management_period_start_date: date,
             management_period_days: int,
-            number_of_animals: int,
+            number_of_animals: float,
             production_stage: ProductionStage,
             number_of_young_animals: int,
             milk_data: Milk,
@@ -282,12 +305,12 @@ class DairyLactatingCow(Dairy):
             housing_type: HousingType,
             manure_handling_system: ManureStateType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
-            indoor_barn_temperature: float = None
+            indoor_barn_temperature: float | Literal["N/A"] = "N/A"
     ):
         super().__init__(
             group_name=self.animal_group.name,
@@ -305,7 +328,7 @@ class DairyCalves(Dairy):
             group_pairing_number: int,
             management_period_start_date: date,
             management_period_days: int,
-            number_of_animals: int,
+            number_of_animals: float,
             production_stage: ProductionStage,
             number_of_young_animals: int,
             milk_data: Milk,
@@ -313,12 +336,12 @@ class DairyCalves(Dairy):
             housing_type: HousingType,
             manure_handling_system: ManureStateType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
-            indoor_barn_temperature: float = None
+            indoor_barn_temperature: float | Literal["N/A"] = "N/A"
     ):
         super().__init__(
             group_name=self.animal_group.name,
@@ -336,7 +359,7 @@ class DairyDryCow(Dairy):
             group_pairing_number: int,
             management_period_start_date: date,
             management_period_days: int,
-            number_of_animals: int,
+            number_of_animals: float,
             production_stage: ProductionStage,
             number_of_young_animals: int,
             milk_data: Milk,
@@ -344,12 +367,12 @@ class DairyDryCow(Dairy):
             housing_type: HousingType,
             manure_handling_system: ManureStateType,
             manure_emission_factors: LivestockEmissionConversionFactorsData,
-            start_weight: float = None,
-            end_weight: float = None,
-            average_daily_gain: float = None,
+            start_weight: float | None = None,
+            end_weight: float | None = None,
+            average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
-            indoor_barn_temperature: float = None
+            indoor_barn_temperature: float | Literal["N/A"] = "N/A"
     ):
         super().__init__(
             group_name=self.animal_group.name,

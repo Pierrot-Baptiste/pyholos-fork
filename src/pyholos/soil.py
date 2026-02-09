@@ -113,7 +113,8 @@ def convert_soil_functional_category_name(
         case "easterncanada" | "east":
             return SoilFunctionalCategory.EasternCanada
         case _:
-            # Trace.TraceError($"{nameof(SoilFunctionalCategoryStringConverter)}: Soil functional category '{input}' not mapped, returning default value.")
+            # Trace.TraceError($"{nameof(SoilFunctionalCategoryStringConverter)}:
+            #   Soil functional category '{input}' not mapped, returning default value.")
             return SoilFunctionalCategory.NotApplicable
 
 
@@ -334,12 +335,14 @@ def get_soil_great_group_table() -> list[SoilGreatGroup]:
 def seek_soil_functional_category(
         province: common2.CanadianProvince,
         soil_great_group: str
-) -> str:
+) -> str | None:
     region = get_region(province=province)
 
     for v in get_soil_great_group_table():
         if all([v.soil_great_group_type == soil_great_group, v.region == region]):
             return v.soil_functional_category
+
+    return None
 
 
 def get_soil_functional_category(
