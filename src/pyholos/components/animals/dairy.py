@@ -1,12 +1,11 @@
 from datetime import date
 from abc import ABC
 from typing import Literal, Any, ClassVar
-from enum import Enum
 from dataclasses import dataclass, field
 
-from pyholos.common import Component, EnumGeneric, HolosVar
+from pyholos.common import EnumGeneric
 from pyholos.components.animals.common import (
-    AnimalCoefficientData,
+    AnimalComponent,
     AnimalType,
     Bedding,
     BeddingMaterialType,
@@ -21,7 +20,6 @@ from pyholos.components.animals.common import (
     get_beef_and_dairy_cattle_feeding_activity_coefficient,
     get_default_methane_producing_capacity_of_manure
 )
-from pyholos.config import DATE_FMT
 from pyholos.utils import convert_camel_case_to_space_delimited
 
 
@@ -29,12 +27,12 @@ from pyholos.utils import convert_camel_case_to_space_delimited
 class GroupNameInfo:
     """Group name info.  Used to generate group names from the animal type.
     Not super useful and we might want more control on group names."""
-    animal_type: AnimalType
-    name: str = field(init=False)
+    group_type: AnimalType
+    group_name: str = field(init=False)
 
     def __post_init__(self):
-        self.name = convert_camel_case_to_space_delimited(
-            s=self.animal_type.value.replace('Cow', '')
+        self.group_name = convert_camel_case_to_space_delimited(
+            s=self.group_type.value.replace('Cow', '')
         ).capitalize()
 
 
@@ -42,10 +40,10 @@ class GroupNameType(EnumGeneric):
     """Group name types.  Enum for different implemented groups.
     We might want to simply remove restriction on what group we can make as it is
     not a restriction in Holos."""
-    dairy_heifers = GroupNameInfo(animal_type=AnimalType.dairy_heifers)
-    dairy_lactating_cow = GroupNameInfo(animal_type=AnimalType.dairy_lactating_cow)
-    dairy_calves = GroupNameInfo(animal_type=AnimalType.dairy_calves)
-    dairy_dry_cow = GroupNameInfo(animal_type=AnimalType.dairy_dry_cow)
+    dairy_heifers = GroupNameInfo(group_type=AnimalType.dairy_heifers)
+    dairy_lactating_cow = GroupNameInfo(group_type=AnimalType.dairy_lactating_cow)
+    dairy_calves = GroupNameInfo(group_type=AnimalType.dairy_calves)
+    dairy_dry_cow = GroupNameInfo(group_type=AnimalType.dairy_dry_cow)
 
 
 # Constant that contains every columns the final CSVs need to have for this component.
@@ -106,60 +104,8 @@ DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, Any], ...] = (
 )
 
 
-class DairyBase(Component):
-    DAIRY_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, Any], ...]] = DAIRY_COMPONENT_HOLOS_VAR
-
-    def to_dict(self) -> dict:
-        out = dict()
-        for attr_name, _, _ in self.DAIRY_COMPONENT_HOLOS_VAR:
-            current_value = getattr(self, attr_name, None)
-            if not isinstance(current_value, HolosVar):
-                raise ValueError(f"Attribute {attr_name} should be a HolosVar instance")
-            out[current_value.name] = current_value.value
-        return out
-
-    def _clean_holos_value[T](self, value: T) -> T | str | int | float | bool | None:
-        """Helper function to make some preprocessing on attributes to convert to HoloVar.
-        For now, it's only datetime.date -> string
-        """
-        match value:
-            case date():
-                return value.strftime(DATE_FMT)
-            case Enum():
-                return value.value
-            case HolosVar():
-                return self._clean_holos_value(value.value)
-            case _:
-                return value
-        return value
-
-    def _fix_holos_vars(self):
-        """Helper function that processes every attributes listed in holos_vars and
-        converts them to HolosVar instances so that they are written in the final CSV.
-        If value is missing, defaults are used.
-
-        Args:
-            holos_vars (tuple[tuple[str, str, Any], ...], optional): Every attributes that needs to become a csv column
-                in the final CSVs for this component. Defaults to DAIRY_COMPONENT_HOLOS_VAR.
-        """
-        for attribute_name, holos_name, default in self.DAIRY_COMPONENT_HOLOS_VAR:
-            default_value = default(self) if callable(default) else default
-            current = getattr(self, attribute_name, None)
-            if isinstance(current, HolosVar):
-                # Normalize in place & ensure name consistency
-                current.value = self._clean_holos_value(current.value)
-                current.name = holos_name
-                continue
-            value_cleaned = (
-                self._clean_holos_value(current)
-                if current is not None
-                else self._clean_holos_value(default_value)
-            )
-            setattr(self, attribute_name, HolosVar(name=holos_name, value=value_cleaned))
-
-    def __init__(self):
-        super().__init__()
-        self._animal_coefficient_data: AnimalCoefficientData = AnimalCoefficientData()
+class DairyBase(AnimalComponent):
+    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, Any], ...]] = DAIRY_COMPONENT_HOLOS_VAR
 
 
 @dataclass
@@ -226,19 +172,19 @@ class Dairy(DairyBase, ABC):
 
     def __post_init__(self):
         super().__init__()
-        self.group_name = self.animal_group.name
-        self.group_type = self.animal_group.animal_type
+        self.group_name = self.animal_group.group_name
+        self.group_type = self.animal_group.group_type
 
         self.get_animal_coefficient_data()
+
+        self.maintenance_coefficient = self._animal_coefficient_data.baseline_maintenance_coefficient
+        self.gain_coefficient = self._animal_coefficient_data.gain_coefficient
 
         if self.start_weight is None:
             self.start_weight = self._animal_coefficient_data.default_initial_weight
 
         if self.end_weight is None:
             self.end_weight = self._animal_coefficient_data.default_final_weight
-
-        self.maintenance_coefficient = self._animal_coefficient_data.baseline_maintenance_coefficient
-        self.gain_coefficient = self._animal_coefficient_data.gain_coefficient
 
         if self.average_daily_gain is None:
             self.average_daily_gain = (

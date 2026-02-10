@@ -5,6 +5,7 @@ from pathlib import Path
 
 from pyholos.common2 import CanadianProvince
 from pyholos.components.animals import common, dairy
+from pyholos.common import HolosVar
 from pyholos.soil import SoilTexture
 from pyholos.utils import read_holos_resource_table
 
@@ -285,7 +286,7 @@ class TestDairyRefactorUnit(unittest.TestCase):
         obj = self.make_heifers()
 
         # Force un HolosVar existant sur un champ
-        hv = dairy.HolosVar(name="Crude Protein", value=42)
+        hv = HolosVar(name="Crude Protein", value=42)
         setattr(obj, "crude_protein", hv)
 
         # Appel de matérialisation: doit mettre à jour in-place
@@ -306,7 +307,7 @@ class TestDairyRefactorUnit(unittest.TestCase):
 
         try:
             obj = self.make_heifers()
-            obj.DAIRY_COMPONENT_HOLOS_VAR = tuple(tmp_schema)  # ClassVar modified to check its behavior
+            obj.ANIMAL_COMPONENT_HOLOS_VAR = tuple(tmp_schema)  # ClassVar modified to check its behavior
             # On appelle _fix_holos_vars avec la spec étendue
             obj._fix_holos_vars()
             out = obj.to_dict()  # to_dict() va rematérialiser, mais doit conserver la valeur

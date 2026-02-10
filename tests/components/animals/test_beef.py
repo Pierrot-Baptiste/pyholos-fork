@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 from pyholos.common2 import CanadianProvince
-from pyholos.components.animals import beef, common
+from pyholos.components.animals import common, beef
 from pyholos.soil import SoilTexture
 from pyholos.utils import read_holos_resource_table
 
@@ -16,27 +16,6 @@ def are_real_numbers(*x) -> bool:
         if not (is_real_number and not is_boolean):
             return False
     return True
-
-
-class TestBeef(unittest.TestCase):
-    def setUp(self):
-        self.beef = beef.BeefBase()
-
-    def test_update_name(self):
-        old_name = self.beef.name.value
-        new_name = 'test_name'
-        self.beef.update_name(name=new_name)
-        self.assertEqual(
-            ' '.join((old_name, new_name)),
-            self.beef.name.value)
-
-    def test_update_component_type(self):
-        old_name = self.beef.component_type.value
-        new_name = 'test_name'
-        self.beef.update_component_type(component_type=new_name)
-        self.assertEqual(
-            '.'.join((old_name, new_name)),
-            self.beef.component_type.value)
 
 
 class TestBeefCowCalfNonRegression(unittest.TestCase):

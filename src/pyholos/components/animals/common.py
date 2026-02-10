@@ -1,6 +1,7 @@
-from enum import auto
+from enum import Enum, auto
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, Any
+from datetime import date
 
 from pandas import DataFrame, to_numeric
 from pydantic import BaseModel, Field, NonNegativeFloat
@@ -16,6 +17,60 @@ from pyholos.config import PathsHolosResources
 from pyholos.defaults import Defaults
 from pyholos.soil import SoilTexture
 from pyholos.utils import AutoNameEnum, read_holos_resource_table
+from pyholos.config import DATE_FMT
+
+
+class AnimalComponent:
+    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, Any], ...]]
+
+    def to_dict(self) -> dict:
+        out = dict()
+        for attr_name, _, _ in self.ANIMAL_COMPONENT_HOLOS_VAR:
+            current_value = getattr(self, attr_name, None)
+            if not isinstance(current_value, HolosVar):
+                raise ValueError(f"Attribute {attr_name} should be a HolosVar instance")
+            out[current_value.name] = current_value.value
+        return out
+
+    def _clean_holos_value[T](self, value: T) -> T | str | int | float | bool | None:
+        """Helper function to make some preprocessing on attributes to convert to HoloVar.
+        For now, it's only datetime.date -> string
+        """
+        match value:
+            case date():
+                return value.strftime(DATE_FMT)
+            case Enum():
+                return value.value
+            case HolosVar():
+                return self._clean_holos_value(value.value)
+            case _:
+                return value
+        return value
+
+    def _fix_holos_vars(self):
+        """Helper function that processes every attributes listed in holos_vars and
+        converts them to HolosVar instances so that they are written in the final CSV.
+        If value is missing, defaults are used.
+
+        """
+        for attribute_name, holos_name, default in self.ANIMAL_COMPONENT_HOLOS_VAR:
+            default_value = default(self) if callable(default) else default
+            current = getattr(self, attribute_name, None)
+            if isinstance(current, HolosVar):
+                # Normalize in place & ensure name consistency
+                current.value = self._clean_holos_value(current.value)
+                current.name = holos_name
+                continue
+            value_cleaned = (
+                self._clean_holos_value(current)
+                if current is not None
+                else self._clean_holos_value(default_value)
+            )
+            setattr(self, attribute_name, HolosVar(name=holos_name, value=value_cleaned))
+
+    def __init__(self):
+        super().__init__()
+        self._animal_coefficient_data: AnimalCoefficientData = AnimalCoefficientData()
 
 
 class DietAdditiveType(str, EnumGeneric):
