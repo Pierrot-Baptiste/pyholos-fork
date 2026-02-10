@@ -2238,8 +2238,17 @@ def get_default_manure_composition_data(
 
 
 def get_beef_and_dairy_cattle_coefficient_data(
-        animal_type: str
+        animal_type: AnimalType
 ) -> AnimalCoefficientData:
+    """Retreives the coefficient data for beef and dairy from Holos Table 16.
+    If animal_type is not in the table's index, returns an empty object
+
+    Args:
+        animal_type (AnimalType): Animal type to lookup in the table's index
+
+    Returns:
+        AnimalCoefficientData: Table 16. Livestock coefficients for beef cattle and dairy cattle
+    """
     df = HolosTables.Table_16_Livestock_Coefficients_BeefAndDairy_Cattle_Provider
 
     if animal_type not in df.index:
