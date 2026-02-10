@@ -1,4 +1,5 @@
 from enum import auto
+from dataclasses import dataclass
 from typing import ClassVar
 
 from pandas import DataFrame, to_numeric
@@ -998,26 +999,20 @@ class Bedding:
             return {k: None for k in result.columns}
 
 
+@dataclass
 class AnimalCoefficientData:
-    def __init__(
-            self,
-            baseline_maintenance_coefficient: float = 0,
-            gain_coefficient: float = 0,
-            default_initial_weight: float = 0,
-            default_final_weight: float = 0
-    ):
-        """Table 16. Livestock coefficients for beef cattle and dairy cattle.
+    """Table 16. Livestock coefficients for beef cattle and dairy cattle.
 
-        Args:
-            baseline_maintenance_coefficient: (MJ d-1 kg-1) baseline maintenance coefficient (C_f)
-            gain_coefficient: (dimensionless?) gain coefficient (C_d)
-            default_initial_weight: (kg) initial weight
-            default_final_weight: (kg) final weight
-        """
-        self.baseline_maintenance_coefficient = baseline_maintenance_coefficient
-        self.gain_coefficient = gain_coefficient
-        self.default_initial_weight = default_initial_weight
-        self.default_final_weight = default_final_weight
+    Args:
+        baseline_maintenance_coefficient: (MJ d-1 kg-1) baseline maintenance coefficient (C_f)
+        gain_coefficient: (dimensionless?) gain coefficient (C_d)
+        default_initial_weight: (kg) initial weight
+        default_final_weight: (kg) final weight
+    """
+    baseline_maintenance_coefficient: float = 0
+    gain_coefficient: float = 0
+    default_initial_weight: float = 0
+    default_final_weight: float = 0
 
 
 def get_methane_producing_capacity_of_manure(
@@ -1120,41 +1115,28 @@ def get_default_methane_producing_capacity_of_manure(
     return 0.19 if is_pasture else get_methane_producing_capacity_of_manure(animal_type=animal_type)
 
 
+@dataclass
 class FractionOfOrganicNitrogenMineralizedData:
-    def __init__(
-            self,
-            fraction_immobilized: float = 0,
-            fraction_mineralized: float = 0,
-            fraction_nitrified: float = 0,
-            fraction_denitrified: float = 0,
-            n2o_n: float = 0,
-            no_n: float = 0,
-            n2_n: float = 0,
-            n_leached: float = 0,
-    ):
-        """Mineralization of organic N (fecal N and bedding N)
+    """Mineralization of organic N (fecal N and bedding N)
 
-        Args:
-            fraction_mineralized: (dimensionless) fraction of nitrogen mineralized
-            fraction_immobilized: (dimensionless) fraction of nitrogen immobilized
-            fraction_nitrified: (dimensionless) fraction of nitrogen nitrified
-            fraction_denitrified: (dimensionless) fraction of nitrogen denitrified
-            n2o_n:
-            no_n:
-            n2_n:
-            n_leached:
-        """
-        self.fraction_mineralized = fraction_mineralized
-        self.fraction_immobilized = fraction_immobilized
-        self.fraction_nitrified = fraction_nitrified
-        self.fraction_denitrified = fraction_denitrified
-        self.n2o_n = n2o_n
-        self.no_n = no_n
-        self.n2_n = n2_n
-        self.n_leached = n_leached
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__ if isinstance(other, self.__class__) else False
+    Args:
+        fraction_mineralized: (dimensionless) fraction of nitrogen mineralized
+        fraction_immobilized: (dimensionless) fraction of nitrogen immobilized
+        fraction_nitrified: (dimensionless) fraction of nitrogen nitrified
+        fraction_denitrified: (dimensionless) fraction of nitrogen denitrified
+        n2o_n:
+        no_n:
+        n2_n:
+        n_leached:
+    """
+    fraction_immobilized: float = 0
+    fraction_mineralized: float = 0
+    fraction_nitrified: float = 0
+    fraction_denitrified: float = 0
+    n2o_n: float = 0
+    no_n: float = 0
+    n2_n: float = 0
+    n_leached: float = 0
 
 
 class ManureStateType(str, EnumGeneric):
@@ -2202,22 +2184,14 @@ def convert_manure_state_type_name(name: str) -> ManureStateType:
             return ManureStateType.not_selected
 
 
+@dataclass
 class ManureComposition:
-    def __init__(
-            self,
-            moisture_content: float,
-            nitrogen_content: float,
-            carbon_content: float,
-            phosphorus_content: float,
-            carbon_to_nitrogen_ratio: float,
-            volatile_solid_content: float
-    ):
-        self.moisture_content = moisture_content
-        self.nitrogen_content = nitrogen_content
-        self.carbon_content = carbon_content
-        self.phosphorus_content = phosphorus_content
-        self.carbon_to_nitrogen_ratio = carbon_to_nitrogen_ratio
-        self.volatile_solid_content = volatile_solid_content
+    moisture_content: float
+    nitrogen_content: float
+    carbon_content: float
+    phosphorus_content: float
+    carbon_to_nitrogen_ratio: float
+    volatile_solid_content: float
 
 
 def get_default_manure_composition_data(

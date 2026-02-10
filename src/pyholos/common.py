@@ -1,4 +1,5 @@
 from enum import Enum, StrEnum, auto, unique
+from dataclasses import dataclass
 from typing import Any
 
 from pyholos.common2 import CanadianProvince
@@ -15,14 +16,10 @@ class EnumGeneric(Enum):
         return getattr(cls, name)
 
 
+@dataclass
 class HolosVar:
-    def __init__(
-            self,
-            name: str,
-            value: Any = None
-    ):
-        self.name = name
-        self.value = value
+    name: str
+    value: Any = None
 
 
 class Component:

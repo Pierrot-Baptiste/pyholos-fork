@@ -1,25 +1,36 @@
 from datetime import date
 from typing import Literal
+from dataclasses import dataclass
 
 from pyholos.common import Component, EnumGeneric, HolosVar
 from pyholos.components.animals.common import (
-    AnimalCoefficientData, AnimalType, Bedding, BeddingMaterialType, Diet,
-    DietAdditiveType, HousingType, LivestockEmissionConversionFactorsData,
-    ManureStateType, Milk, ProductionStage,
+    AnimalCoefficientData,
+    AnimalType,
+    Bedding,
+    BeddingMaterialType,
+    Diet,
+    DietAdditiveType,
+    HousingType,
+    LivestockEmissionConversionFactorsData,
+    ManureStateType,
+    Milk,
+    ProductionStage,
     get_beef_and_dairy_cattle_coefficient_data,
     get_beef_and_dairy_cattle_feeding_activity_coefficient,
-    get_default_methane_producing_capacity_of_manure)
+    get_default_methane_producing_capacity_of_manure
+)
 from pyholos.config import DATE_FMT
 from pyholos.utils import convert_camel_case_to_space_delimited, get_local_args
 
 
+@dataclass
 class _GroupNameType:
-    def __init__(
-            self,
-            animal_type: AnimalType,
-    ):
-        self.type = animal_type
-        self.name = convert_camel_case_to_space_delimited(s=animal_type.value.replace('Cow', '')).capitalize()
+    animal_type: AnimalType
+
+    def __post_init__(self):
+        self.name = convert_camel_case_to_space_delimited(
+            s=self.animal_type.value.replace('Cow', '')
+        ).capitalize()
 
 
 class GroupNameType(EnumGeneric):
@@ -140,7 +151,7 @@ class Dairy(DairyBase):
             average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
-            indoor_barn_temperature: float | None = None
+            indoor_barn_temperature: float | Literal["N/A"] = "N/A"
     ):
         """
 
@@ -283,7 +294,7 @@ class DairyHeifers(Dairy):
     ):
         super().__init__(
             group_name=self.animal_group.name,
-            animal_type=self.animal_group.type,
+            animal_type=self.animal_group.animal_type,
             **get_local_args(locals())
         )
 
@@ -314,7 +325,7 @@ class DairyLactatingCow(Dairy):
     ):
         super().__init__(
             group_name=self.animal_group.name,
-            animal_type=self.animal_group.type,
+            animal_type=self.animal_group.animal_type,
             **get_local_args(locals())
         )
 
@@ -345,7 +356,7 @@ class DairyCalves(Dairy):
     ):
         super().__init__(
             group_name=self.animal_group.name,
-            animal_type=self.animal_group.type,
+            animal_type=self.animal_group.animal_type,
             **get_local_args(locals())
         )
 
@@ -376,6 +387,6 @@ class DairyDryCow(Dairy):
     ):
         super().__init__(
             group_name=self.animal_group.name,
-            animal_type=self.animal_group.type,
+            animal_type=self.animal_group.animal_type,
             **get_local_args(locals())
         )
