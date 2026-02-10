@@ -130,7 +130,7 @@ def get_slc_polygon_properties(
 
 
 def get_dominant_component_properties(
-        id_polygon: str,
+        id_polygon: int,
         slc_components_table: DataFrame
 ) -> dict[str, str]:
     return slc_components_table[slc_components_table['POLY_ID'] == id_polygon].sort_values(

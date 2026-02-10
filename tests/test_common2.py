@@ -13,7 +13,7 @@ class TestGetSlcPolygonProperties(unittest.TestCase):
             'sources/soil_data/example_soil_landscapes_of_canada_v3r2/soil_landscapes_of_canada_v3r2.geojson')
         with path_geojson.open(mode='r') as f:
             cls.geojson_data = load(f)
-        common2.PATH_SLC_GEOJSON_FILE = path_geojson
+        common2.PATH_SLC_GEOJSON_FILE = path_geojson  # type: ignore for testing
         cls.expected_outputs = {
             'OBJECTID': 9139,
             'AREA': 0.06119253235,
@@ -34,8 +34,8 @@ class TestGetSlcPolygonProperties(unittest.TestCase):
         self.assertEqual(
             self.expected_outputs,
             common2.get_slc_polygon_properties(
-                latitude="49.98",
-                longitude="-98.04",
+                latitude=49.98,
+                longitude=-98.04,
                 geojson_data=self.geojson_data))
 
     def test_identify_slc_polygon_id_fails_with_missing_location_data(self):

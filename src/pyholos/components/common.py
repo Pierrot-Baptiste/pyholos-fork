@@ -20,7 +20,8 @@ class ComponentType(str, EnumGeneric):
     """Holos component types
 
     References:
-        Source code: https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Models/ComponentType.cs#L5
+        Source code:
+        https://github.com/holos-aafc/Holos/blob/396f1ab9bc7247e6d78766f9445c14d2eb7c0d9d/H.Core/Models/ComponentType.cs#L5
 
     """
     rotation = "Rotation"
@@ -138,7 +139,19 @@ def convert_province_name(name: str) -> CanadianProvince:
             return CanadianProvince.NewBrunswick
         case "novascotia" | "nouvelleécosse" | "nouvelleecosse" | "ns" | "né" | "ne":
             return CanadianProvince.NovaScotia
-        case "princeedwardisland" | "îleduprinceédouard" | "îleduprinceedouard" | "ileduprinceédouard" | "ileduprinceedouard" | "pe" | "pei" | "ipe" | "ipé" | "îpe" | "îpé":
+        case (
+            "princeedwardisland"
+            | "îleduprinceédouard"
+            | "îleduprinceedouard"
+            | "ileduprinceédouard"
+            | "ileduprinceedouard"
+            | "pe"
+            | "pei"
+            | "ipe"
+            | "ipé"
+            | "îpe"
+            | "îpé"
+        ):
             return CanadianProvince.PrinceEdwardIsland
         case "newfoundlandandlabrador" | "terreneuveetlabrador" | "nl" | "nf" | "tnl" | "nfld" | "newfoundland":
             return CanadianProvince.NewfoundlandAndLabrador
@@ -149,7 +162,6 @@ def convert_province_name(name: str) -> CanadianProvince:
         case "nunavut" | "nu" | "nvt":
             return CanadianProvince.Nunavut
         case _:
-            # Trace.TraceError($"{nameof(ProvinceStringConverter)}.{nameof(ProvinceStringConverter.Convert)}: unknown input '{input}'. Returning default value of {Province.Alberta.GetDescription()}");
             return CanadianProvince.Alberta
 
 

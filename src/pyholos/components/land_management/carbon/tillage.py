@@ -1,3 +1,5 @@
+from pandas import to_numeric
+
 from pyholos.common import verify_is_prairie_province
 from pyholos.common2 import CanadianProvince
 from pyholos.components.land_management.common import TillageType
@@ -35,7 +37,7 @@ def calculate_crop_tillage_factor(
     except KeyError:
         res = 1.
 
-    return res
+    return to_numeric(res)
 
 
 def calculate_tillage_factor_for_perennials(
