@@ -18,7 +18,9 @@ from pyholos.components.animals.common import (
     ProductionStage,
     get_beef_and_dairy_cattle_coefficient_data,
     get_beef_and_dairy_cattle_feeding_activity_coefficient,
-    get_default_methane_producing_capacity_of_manure
+    get_default_methane_producing_capacity_of_manure,
+    get_fraction_of_organic_nitrogen_mineralized_data,
+    get_ammonia_emission_factor_for_storage_of_beef_and_dairy_cattle_manure
 )
 from pyholos.utils import convert_camel_case_to_space_delimited
 
@@ -101,6 +103,12 @@ DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, Any], ...] = (
     ("fraction_leaching", "Fraction Leaching", None),
     ("ash_content", "Ash Content", 8.0),
     ("methane_producing_capacity_of_manure", "Methane Producing Capacity Of Manure", None),
+    ("fraction_of_organic_nitrogen_immobilized", "Fraction Of Organic Nitrogen Immobilized", None),
+    ("fraction_of_organic_nitrogen_nitrified", "Fraction Of Organic Nitrogen Nitrified", None),
+    ("fraction_of_organic_nitrogen_mineralized", "Fraction Of Organic Nitrogen Mineralized", None),
+    ("manure_state_type", "Manure State Type", None),
+    ("ammonia_emission_factor_for_manure_storage", "Ammonia Emission Factor For Manure Storage", None),
+    ("use_custom_indoor_housing_temperature", "Use Custom Indoor Housing Temperature", False),
 )
 
 
@@ -230,6 +238,29 @@ class Dairy(DairyBase, ABC):
             is_pasture=self.housing_type.is_pasture(),
             animal_type=self.group_type
         )
+        fraction_of_organic_nitrogen_mineralized_data = get_fraction_of_organic_nitrogen_mineralized_data(
+            state_type=self.manure_handling_system,
+            animal_type=self.group_type
+        )
+
+        self.manure_state_type = self.manure_handling_system
+        self.fraction_of_organic_nitrogen_immobilized = (
+            fraction_of_organic_nitrogen_mineralized_data.fraction_immobilized
+        )
+        self.fraction_of_organic_nitrogen_nitrified = (
+            fraction_of_organic_nitrogen_mineralized_data.fraction_nitrified
+        )
+        self.fraction_of_organic_nitrogen_mineralized = (
+            fraction_of_organic_nitrogen_mineralized_data.fraction_mineralized
+        )
+
+        self.ammonia_emission_factor_for_manure_storage = (
+            get_ammonia_emission_factor_for_storage_of_beef_and_dairy_cattle_manure(
+                storage_type=self.manure_handling_system
+            )
+        )
+
+        self.use_custom_indoor_housing_temperature = False if self.indoor_barn_temperature == "N/A" else True
 
         self.methane_conversion_factor_of_manure = self.manure_emission_factors.MethaneConversionFactor
         self.n2o_direct_emission_factor = self.manure_emission_factors.N2ODirectEmissionFactor

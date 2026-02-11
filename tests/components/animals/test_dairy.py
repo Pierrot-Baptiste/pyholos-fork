@@ -47,6 +47,7 @@ class MyTestCase(unittest.TestCase):
             res: dict
     ):
         for k, v in self.non_regression_data.loc[group_name].to_dict().items():
+            v = str(v).upper() if isinstance(v, bool) else v
             self.assertAlmostEqual(
                 v,
                 res[k],

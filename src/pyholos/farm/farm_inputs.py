@@ -308,7 +308,7 @@ class BeefCattleInput(AnimalInputBase):
             housing_type=management_period.housing_type,
             manure_handling_system=management_period.manure_handling_system,
             manure_emission_factors=get_manure_emission_factors(
-                animal_type=component_class.animal_type,
+                animal_type=component_class.animal_group.group_type,
                 year=management_period.weather_summary.year,
                 manure_state_type=management_period.manure_handling_system,
                 mean_annual_precipitation=management_period.weather_summary.mean_annual_precipitation,
@@ -390,7 +390,7 @@ class DairyCattleInput(AnimalInputBase):
                 mean_annual_evapotranspiration=management_period.weather_summary.mean_annual_evapotranspiration,
                 growing_season_precipitation=management_period.weather_summary.growing_season_precipitation,
                 growing_season_evapotranspiration=management_period.weather_summary.growing_season_evapotranspiration,
-                animal_type=component_class.animal_group.type,
+                animal_type=component_class.animal_group.group_type,
                 province=province,
                 year=management_period.weather_summary.year,
                 soil_texture=soil_texture)

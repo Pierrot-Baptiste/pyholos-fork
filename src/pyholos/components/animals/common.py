@@ -43,6 +43,8 @@ class AnimalComponent:
                 return value.value
             case HolosVar():
                 return self._clean_holos_value(value.value)
+            case bool():
+                return str(value).upper()
             case _:
                 return value
         return value

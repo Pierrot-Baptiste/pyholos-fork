@@ -11,74 +11,50 @@ from pyholos.config import PathsHolosResources
 from pyholos.utils import clean_string
 
 
+@dataclass
 class _IrrigationData:
-    def __init__(
-            self,
-            irrigation_type: IrrigationType,
-            irrigation_lower_range_limit: float,
-            irrigation_upper_range_limit: float
-    ):
-        self.irrigation_type = irrigation_type
-        self.irrigation_lower_range_limit = irrigation_lower_range_limit
-        self.irrigation_upper_range_limit = irrigation_upper_range_limit
+    irrigation_type: IrrigationType | None
+    irrigation_lower_range_limit: float
+    irrigation_upper_range_limit: float
 
 
+@dataclass
 class _CarbonResidueData:
-    def __init__(
-            self,
-            relative_biomass_product: float,
-            relative_biomass_straw: float,
-            relative_biomass_root: float,
-            relative_biomass_extraroot: float
-    ):
-        self.relative_biomass_product = relative_biomass_product
-        self.relative_biomass_straw = relative_biomass_straw
-        self.relative_biomass_root = relative_biomass_root
-        self.relative_biomass_extraroot = relative_biomass_extraroot
+    relative_biomass_product: float
+    relative_biomass_straw: float
+    relative_biomass_root: float
+    relative_biomass_extraroot: float
 
 
+@dataclass
 class _NitrogenResidueData:
-    def __init__(
-            self,
-            nitrogen_content_product: float,
-            nitrogen_content_straw: float,
-            nitrogen_content_root: float
-    ):
-        self.nitrogen_content_product = nitrogen_content_product
-        self.nitrogen_content_straw = nitrogen_content_straw
-        self.nitrogen_content_root = nitrogen_content_root
-        self.nitrogen_content_extraroot = nitrogen_content_root
+    nitrogen_content_product: float
+    nitrogen_content_straw: float
+    nitrogen_content_root: float
+    nitrogen_content_extraroot: float = field(init=False)
+
+    def __post_init__(self):
+        self.nitrogen_content_extraroot = self.nitrogen_content_root
 
 
+@dataclass
 class BiogasAndMethaneProductionParametersData:
-    def __init__(
-            self,
-            crop_type: CropType = CropType.NotSelected,
-            bio_methane_potential: float = 0,
-            methane_fraction: float = 0,
-            volatile_solids: float = 0,
-            total_solids: float = 0,
-            total_nitrogen: float = 0
-    ):
-        """Table_46_Biogas_Methane_Production_CropResidue_Data
+    """Table_46_Biogas_Methane_Production_CropResidue_Data
 
-        Args:
-            crop_type: CropType class member
-            bio_methane_potential: (Nm3 ton-1 VS) biomethane potential given a substrate type (BMP)
-            methane_fraction: (-) fraction of methane in biogas (f_CH4)
-            volatile_solids: (%) percentage of total solids
-            total_solids: (kg t^-1)^3 total solids in the substrate type (TS)
-            total_nitrogen: (KG N t^-1)^5 total Nitrogen in the substrate
-        """
-        self.crop_type = crop_type
-        self.bio_methane_potential = bio_methane_potential
-        self.methane_fraction = methane_fraction
-        self.volatile_solids = volatile_solids
-        self.total_solids = total_solids
-        self.total_nitrogen = total_nitrogen
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__ if isinstance(other, self.__class__) else False
+    Args:
+        crop_type: CropType class member
+        bio_methane_potential: (Nm3 ton-1 VS) biomethane potential given a substrate type (BMP)
+        methane_fraction: (-) fraction of methane in biogas (f_CH4)
+        volatile_solids: (%) percentage of total solids
+        total_solids: (kg t^-1)^3 total solids in the substrate type (TS)
+        total_nitrogen: (KG N t^-1)^5 total Nitrogen in the substrate
+    """
+    crop_type: CropType = CropType.NotSelected
+    bio_methane_potential: float = 0
+    methane_fraction: float = 0
+    volatile_solids: float = 0
+    total_solids: float = 0
+    total_nitrogen: float = 0
 
 
 class RelativeBiomassInformationData(BaseModel):
@@ -190,23 +166,33 @@ def parse_moisture_content_data(
 def parse_carbon_residue_data(
         raw_inputs: list[str]
 ) -> _CarbonResidueData:
-    raw_inputs = [float(s) if len(s.lower().replace(" ", "")) != 0 else 0 for s in raw_inputs]
+    raw_inputs_parsed: list[float] = [
+        float(s)
+        if len(s.lower().replace(" ", "")) != 0
+        else 0
+        for s in raw_inputs
+    ]
     return _CarbonResidueData(
-        relative_biomass_product=raw_inputs[0],
-        relative_biomass_straw=raw_inputs[1],
-        relative_biomass_root=raw_inputs[2],
-        relative_biomass_extraroot=raw_inputs[3]
+        relative_biomass_product=raw_inputs_parsed[0],
+        relative_biomass_straw=raw_inputs_parsed[1],
+        relative_biomass_root=raw_inputs_parsed[2],
+        relative_biomass_extraroot=raw_inputs_parsed[3]
     )
 
 
 def parse_nitrogen_residue_data(
         raw_inputs: list[str]
 ) -> _NitrogenResidueData:
-    raw_inputs = [float(s) if len(s.lower().replace(" ", "")) != 0 else 0 for s in raw_inputs]
+    raw_inputs_parsed: list[float] = [
+        float(s)
+        if len(s.lower().replace(" ", "")) != 0
+        else 0
+        for s in raw_inputs
+    ]
     return _NitrogenResidueData(
-        nitrogen_content_product=raw_inputs[0],
-        nitrogen_content_straw=raw_inputs[1],
-        nitrogen_content_root=raw_inputs[2]
+        nitrogen_content_product=raw_inputs_parsed[0],
+        nitrogen_content_straw=raw_inputs_parsed[1],
+        nitrogen_content_root=raw_inputs_parsed[2]
     )
 
 
@@ -220,14 +206,20 @@ def parse_biomethane_data(
         crop_type: CropType,
         raw_inputs: list[str]
 ) -> BiogasAndMethaneProductionParametersData:
-    raw_inputs = [float(s) if len(s.lower().replace(" ", "")) != 0 else 0 for s in raw_inputs]
+    raw_inputs_parsed: list[float] = [
+        float(s)
+        if len(s.lower().replace(" ", "")) != 0
+        else 0
+        for s in raw_inputs
+    ]
     return BiogasAndMethaneProductionParametersData(
         crop_type=crop_type,
-        bio_methane_potential=raw_inputs[0],
-        methane_fraction=raw_inputs[1],
-        volatile_solids=raw_inputs[2],
-        total_solids=raw_inputs[3],
-        total_nitrogen=raw_inputs[4])
+        bio_methane_potential=raw_inputs_parsed[0],
+        methane_fraction=raw_inputs_parsed[1],
+        volatile_solids=raw_inputs_parsed[2],
+        total_solids=raw_inputs_parsed[3],
+        total_nitrogen=raw_inputs_parsed[4]
+    )
 
 
 def parse_relative_biomass_information_data(
@@ -286,12 +278,12 @@ def get_relative_biomass_information_data(
         return RelativeBiomassInformationData()
 
     if crop_type.is_grassland():
-        # Only have values for grassland (native). If type is grassland (broken) or grassland (seeded), return values for grassland (native)
+        # Only have values for grassland (native). If type is grassland (broken)
+        # or grassland (seeded), return values for grassland (native)
         crop_type = CropType.RangelandNative
 
     by_crop_type = [v for v in table_7 if v.crop_type == crop_type]
     if len(by_crop_type) == 0:
-        # Trace.TraceError($"{nameof(Table_7_Relative_Biomass_Information_Provider)}.{nameof(this.GetResidueData)}: unknown crop type: '{cropType.GetDescription()}'. Returning default values.");
         return RelativeBiomassInformationData()
 
     elif len(by_crop_type) == 1:
@@ -335,14 +327,14 @@ class NitrogenLigninContentInCropsData:
     Holos source code:
         https://github.com/holos-aafc/Holos/blob/d62072ff1362eb356ba00f2736293e3fe0f8acc2/H.Core/Providers/Plants/Table_9_Nitrogen_Lignin_Content_In_Crops_Data.cs#L9
     """
-    CropType: CropType = CropType.NotSelected
-    InterceptValue: float = 0
-    SlopeValue: float = 0
-    RSTRatio: float = 0
-    NitrogenContentResidues: float = 0
-    LigninContentResidues: float = 0
-    MoistureContent: float = 0
-    BiomethaneData: BiogasAndMethaneProductionParametersData = field(
+    crop_type: CropType = CropType.NotSelected
+    intercept_value: float = 0
+    slope_value: float = 0
+    rst_ratio: float = 0
+    nitrogen_content_residues: float = 0
+    lignin_content_residues: float = 0
+    moisture_content: float = 0
+    biomethane_data: BiogasAndMethaneProductionParametersData = field(
         default_factory=BiogasAndMethaneProductionParametersData)
 
 
@@ -361,14 +353,14 @@ def parse_nitrogen_lignin_content_in_crops_data(
         BiogasAndMethaneProductionParametersData(crop_type, *[float(v) if v != '' else 0 for v in columns[8:]]))
 
     return NitrogenLigninContentInCropsData(
-        CropType=crop_type,
-        InterceptValue=float(columns[2]),
-        SlopeValue=float(columns[3]),
-        RSTRatio=float(columns[4]),
-        NitrogenContentResidues=float(columns[5]),
-        LigninContentResidues=float(columns[6]),
-        MoistureContent=float(columns[7]),
-        BiomethaneData=biomethane_data
+        crop_type=crop_type,
+        intercept_value=float(columns[2]),
+        slope_value=float(columns[3]),
+        rst_ratio=float(columns[4]),
+        nitrogen_content_residues=float(columns[5]),
+        lignin_content_residues=float(columns[6]),
+        moisture_content=float(columns[7]),
+        biomethane_data=biomethane_data
     )
 
 
@@ -405,6 +397,6 @@ def get_nitrogen_lignin_content_in_crops_data(
     lookup_type = CropType.Durum if (crop_type == CropType.Wheat) else (
         CropType.Rye if crop_type == CropType.RyeSecaleCerealeWinterRyeCerealRye else crop_type)
 
-    res = [v for v in table_9 if v.CropType == lookup_type]
+    res = [v for v in table_9 if v.crop_type == lookup_type]
 
     return res[0] if len(res) > 0 else NitrogenLigninContentInCropsData()

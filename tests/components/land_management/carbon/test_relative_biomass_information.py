@@ -499,7 +499,7 @@ class TestParseNitrogenLigninContentInCropsData(unittest.TestCase):
         crop_type = CropType.SummerFallow
         self.assertEqual(
             NitrogenLigninContentInCropsData(
-                CropType=crop_type),
+                crop_type=crop_type),
             parse_nitrogen_lignin_content_in_crops_data(
                 raw_input=self.lines[0]))
 
@@ -507,13 +507,13 @@ class TestParseNitrogenLigninContentInCropsData(unittest.TestCase):
         crop_type = CropType.Sorghum
         self.assertEqual(
             NitrogenLigninContentInCropsData(
-                CropType=crop_type,
-                InterceptValue=-9,
-                SlopeValue=-9,
-                RSTRatio=-9,
-                NitrogenContentResidues=0.0065,
-                LigninContentResidues=0.06,
-                MoistureContent=12),
+                crop_type=crop_type,
+                intercept_value=-9,
+                slope_value=-9,
+                rst_ratio=-9,
+                nitrogen_content_residues=0.0065,
+                lignin_content_residues=0.06,
+                moisture_content=12),
             parse_nitrogen_lignin_content_in_crops_data(
                 raw_input=self.lines[6]))
 
@@ -521,14 +521,14 @@ class TestParseNitrogenLigninContentInCropsData(unittest.TestCase):
         crop_type = CropType.Durum
         self.assertEqual(
             NitrogenLigninContentInCropsData(
-                CropType=crop_type,
-                InterceptValue=0.344,
-                SlopeValue=0.015,
-                RSTRatio=0.229,
-                NitrogenContentResidues=0.007,
-                LigninContentResidues=0.053,
-                MoistureContent=12,
-                BiomethaneData=BiogasAndMethaneProductionParametersData(
+                crop_type=crop_type,
+                intercept_value=0.344,
+                slope_value=0.015,
+                rst_ratio=0.229,
+                nitrogen_content_residues=0.007,
+                lignin_content_residues=0.053,
+                moisture_content=12,
+                biomethane_data=BiogasAndMethaneProductionParametersData(
                     crop_type=crop_type,
                     bio_methane_potential=162,
                     methane_fraction=0.6,
@@ -545,14 +545,14 @@ class TestParseNitrogenLigninContentInCropsData(unittest.TestCase):
         ]:
             self.assertEqual(
                 NitrogenLigninContentInCropsData(
-                    CropType=crop_type,
-                    InterceptValue=0.344,
-                    SlopeValue=0.015,
-                    RSTRatio=0.229,
-                    NitrogenContentResidues=0.007,
-                    LigninContentResidues=0.053,
-                    MoistureContent=12,
-                    BiomethaneData=BiogasAndMethaneProductionParametersData(
+                    crop_type=crop_type,
+                    intercept_value=0.344,
+                    slope_value=0.015,
+                    rst_ratio=0.229,
+                    nitrogen_content_residues=0.007,
+                    lignin_content_residues=0.053,
+                    moisture_content=12,
+                    biomethane_data=BiogasAndMethaneProductionParametersData(
                         crop_type=crop_type,
                         bio_methane_potential=241,
                         methane_fraction=0.44,
@@ -567,7 +567,7 @@ class TestGetNitrogenLigninContentInCropsData(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.table_9 = parse_table_9()
-        cls.included_crops = [(i, v.CropType) for i, v in enumerate(cls.table_9)]
+        cls.included_crops = [(i, v.crop_type) for i, v in enumerate(cls.table_9)]
 
     def test_values_for_wheat(self):
         for crop_type in [

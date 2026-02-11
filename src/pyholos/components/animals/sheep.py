@@ -1,17 +1,26 @@
 from datetime import date
 from enum import StrEnum
+from dataclasses import dataclass
 
 from pandas import to_numeric
 
 from pyholos import utils
 from pyholos.common import Component, HolosVar
 from pyholos.components.animals.common import (
-    AnimalType, Bedding, BeddingMaterialType, Diet, DietAdditiveType,
-    HousingType, LivestockEmissionConversionFactorsData, ManureStateType,
-    ProductionStage, convert_animal_type_name,
+    AnimalType,
+    Bedding,
+    BeddingMaterialType,
+    Diet,
+    DietAdditiveType,
+    HousingType,
+    LivestockEmissionConversionFactorsData,
+    ManureStateType,
+    ProductionStage,
+    convert_animal_type_name,
     get_default_manure_composition_data,
     get_default_methane_producing_capacity_of_manure,
-    get_manure_excretion_rate)
+    get_manure_excretion_rate,
+)
 from pyholos.components.common import ComponentType
 from pyholos.config import DATE_FMT, PathsHolosResources
 
@@ -53,7 +62,6 @@ def get_feeding_activity_coefficient(
 
         case _:
             raise ValueError(f"unable to get data for housing type: {housing_type}. Returning default value of 0.")
-            # return 0
 
 
 class GroupNames(StrEnum):
@@ -64,32 +72,25 @@ class GroupNames(StrEnum):
     lambs_and_ewes = "Lambs & ewes"
 
 
+@dataclass
 class AnimalCoefficientData:
-    def __init__(
-            self,
-            maintenance_coefficient: float = 0,
-            coefficient_a: float = 0,
-            coefficient_b: float = 0,
-            initial_weight: float = 0,
-            final_weight: float = 0,
-            wool_production: float = 0
-    ):
-        """Table_22_Livestock_Coefficients_For_Sheep.csv
+    """Table_22_Livestock_Coefficients_For_Sheep.csv
 
-        Args:
-            maintenance_coefficient: (MJ d-1 kg-1) maintenance coefficient (cf)
-            coefficient_a: (MJ kg-1)
-            coefficient_b: (MJ kg-2)
-            initial_weight: (kg)
-            final_weight: (kg)
-            wool_production: : (kg year-1)
-        """
-        self.baseline_maintenance_coefficient = maintenance_coefficient
-        self.coefficient_a = coefficient_a
-        self.coefficient_b = coefficient_b
-        self.initial_weight = initial_weight
-        self.final_weight = final_weight
-        self.wool_production = wool_production
+    Args:
+        maintenance_coefficient: (MJ d-1 kg-1) maintenance coefficient (cf)
+        coefficient_a: (MJ kg-1)
+        coefficient_b: (MJ kg-2)
+        initial_weight: (kg)
+        final_weight: (kg)
+        wool_production: : (kg year-1)
+    """
+
+    baseline_maintenance_coefficient: float = 0
+    coefficient_a: float = 0
+    coefficient_b: float = 0
+    initial_weight: float = 0
+    final_weight: float = 0
+    wool_production: float = 0
 
 
 class SheepBase(Component):
@@ -182,7 +183,7 @@ class SheepBase(Component):
         if lookup_type not in df.index:
             return AnimalCoefficientData()
         return AnimalCoefficientData(
-            maintenance_coefficient=to_numeric(df.at[lookup_type, 'cf']),
+            baseline_maintenance_coefficient=to_numeric(df.at[lookup_type, 'cf']),
             coefficient_a=to_numeric(df.at[lookup_type, 'a']),
             coefficient_b=to_numeric(df.at[lookup_type, 'b']),
             initial_weight=to_numeric(df.at[lookup_type, 'Initial Weight']),

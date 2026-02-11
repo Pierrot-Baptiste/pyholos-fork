@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 from os import environ
 from pathlib import Path
 
-PATH_HOLOS_CLI = Path(environ['PATH_HOLOS_CLI'])
 DATE_FMT = "%Y-%m-%d"
 
 _PATH_HOLOS_SERVICE_RESOURCES = Path(__file__).parent / 'resources'
@@ -47,3 +48,92 @@ class PathsSlcData:
     cmp_file = csv_dir / 'ca_all_slc_v3r2_cmp.csv'
     slt_file = csv_dir / 'ca_all_slc_v3r2_slt.csv'
     snt_file = csv_dir / 'ca_all_slc_v3r2_snt.csv'
+
+
+def _get_env_path_holos_cli() -> Path | None:
+    """Return PATH_HOLOS_CLI from environment if it exists and is a valid file."""
+    raw = environ.get('PATH_HOLOS_CLI')
+    if not raw:
+        return None
+    p = Path(raw)
+    if p.is_file():
+        return p
+    return None
+
+
+def _iter_candidate_dirs() -> list[Path]:
+    """
+    Return candidate directories to search H.CLI.exe.
+    Prioritize ClickOnce default path under %LOCALAPPDATA%\\Apps\\2.0.
+    Add other known static locations if available in your environment.
+    """
+    candidates: list[Path] = []
+
+    # ClickOnce root — the real culprit but where the exe lives.
+    local_app_data = environ.get('LOCALAPPDATA')
+    if local_app_data:
+        candidates.append(Path(local_app_data) / 'Apps' / '2.0')
+
+    # Hypothetical "classic" install under Program Files (if your TI bascule un jour)
+    program_files = environ.get('ProgramFiles')
+    if program_files:
+        candidates.append(Path(program_files) / 'Holos CLI')
+
+    # Add any internal/company-specific stable location here if applicable.
+    # candidates.append(Path(r"C:\HolosTools"))
+
+    return candidates
+
+
+def _find_latest_holos_cli_in(root: Path) -> Path | None:
+    """
+    Search recursively under 'root' for H.CLI.exe and return the most recently modified one.
+    If none is found, return None.
+    """
+    pattern = "**/H.CLI.exe"
+    try:
+        exes = sorted(
+            root.glob(pattern),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True
+        )
+    except PermissionError:
+        # Some ClickOnce subfolders can be protected or transient; ignore errors.
+        exes = []
+
+    for exe in exes:
+        if exe.is_file():
+            return exe
+
+    return None
+
+
+def resolve_path_holos_cli() -> Path:
+    """
+    Resolve the path to H.CLI.exe robustly.
+    Priority:
+      1) Valid PATH_HOLOS_CLI env var (file exists)
+      2) Latest H.CLI.exe found under known candidate directories
+    Raises FileNotFoundError if nothing is found.
+    """
+    # 1) Env var
+    p = _get_env_path_holos_cli()
+    if p is not None:
+        return p
+
+    # 2) Scan candidates
+    for root in _iter_candidate_dirs():
+        found = _find_latest_holos_cli_in(root=root)
+        if found is not None:
+            return found
+
+    raise FileNotFoundError(
+        "Cannot locate H.CLI.exe. "
+        "Please set PATH_HOLOS_CLI to a valid executable, "
+        "or ensure Holos CLI is installed (ClickOnce or MSI)."
+    )
+
+
+# Keep backward compatibility: expose PATH_HOLOS_CLI as a Path
+# that is resolved dynamically at import time.
+PATH_HOLOS_CLI: Path = resolve_path_holos_cli()

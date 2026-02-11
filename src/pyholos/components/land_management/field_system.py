@@ -175,7 +175,11 @@ class LandManagementBase(Component):
         Holos source code:
             https://github.com/holos-aafc/Holos/blob/23a53f1fe6796145cc3ac43c005dbcc560421deb/H.Core/Models/LandManagement/Fields/CropViewItem.cs#L1289
         """
-        self.irrigation_type.value = IrrigationType.Irrigated if self.amount_of_irrigation.value > 0 else IrrigationType.RainFed
+        self.irrigation_type.value = (
+            IrrigationType.Irrigated
+            if self.amount_of_irrigation.value > 0
+            else IrrigationType.RainFed
+        )
 
     def set_moisture_content(self):
         if any([
@@ -185,7 +189,7 @@ class LandManagementBase(Component):
             self.crop_type.value.is_silage_crop()
         ]):
             """Sets the moisture percentage of the harvested biomass.
-            
+
             Holos source code:
                 https://github.com/holos-aafc/Holos/blob/23a53f1fe6796145cc3ac43c005dbcc560421deb/H.Core/Services/Initialization/Crops/CropInitializationService.Water.cs#L60
             """
@@ -262,12 +266,15 @@ class LandManagementBase(Component):
         self.biomass_coefficient_roots.value = residue_data.relative_biomass_root
         self.biomass_coefficient_extraroot.value = residue_data.relative_biomass_extraroot
 
-        if self.harvest_method.value in [
+        if self.harvest_method.value in {
             HarvestMethod.Swathing,
             HarvestMethod.GreenManure,
             HarvestMethod.Silage
-        ]:
-            self.biomass_coefficient_product.value = residue_data.relative_biomass_product + residue_data.relative_biomass_straw
+        }:
+            self.biomass_coefficient_product.value = (
+                residue_data.relative_biomass_product
+                + residue_data.relative_biomass_straw
+            )
             self.biomass_coefficient_straw.value = 0
             self.biomass_coefficient_roots.value = residue_data.relative_biomass_root
             self.biomass_coefficient_extraroot.value = residue_data.relative_biomass_extraroot
@@ -300,7 +307,7 @@ class LandManagementBase(Component):
             crop_type=self.crop_type.value,
             table_9=TABLE_9)
 
-        self.nitrogen_content.value = crop_data.NitrogenContentResidues
+        self.nitrogen_content.value = crop_data.nitrogen_content_residues
 
 
 class CropViewItem(LandManagementBase):
@@ -348,16 +355,22 @@ class CropViewItem(LandManagementBase):
             field_area: (ha) area of the field
             current_year: current year of simulation (constant for all years of a crop rotation)
             crop_year: simulated year (each row in input file must correspond to a certain year)
-            year_in_perennial_stand: year within the perennial stand (if any). Each year of a perennial stand must have the year identified in the row of the input file. E.g. a six year perennial stand would have one row with this value set 1 for the first year, 2 for the second year, etc
+            year_in_perennial_stand: year within the perennial stand (if any). Each year of a perennial stand
+                must have the year identified in the row of the input file. E.g. a six year perennial stand would
+                have one row with this value set 1 for the first year, 2 for the second year, etc
             crop_type: CropType instance
             tillage_type: TillageType instance
-            perennial_stand_id: Used to group all years of a perennial stand together. Each year in a distinct perennial stand must have this value set. All years in the same perennial stand must have this same ID/value. Can be thought of as a 'group' ID
+            perennial_stand_id: Used to group all years of a perennial stand together. Each year in a distinct
+                perennial stand must have this value set. All years in the same perennial stand must have this same
+                ID/value. Can be thought of as a 'group' ID
             perennial_stand_length: (-) number of years a perennial crop is grown
             relative_biomass_information_data: RelativeBiomassInformationData instance
             crop_yield: (kg(DM)/ha) crop yield
             harvest_method: HarvestMethod
             nitrogen_fertilizer_rate: (kg(N)/ha) applied nitrogen
-            under_sown_crops_used: Set to True when this view item is a perennial crop and the previous year is an annual crop and the user wants to indicate that this year's crop (the perennial) is undersown into the previous year's crop (the annual)
+            under_sown_crops_used: Set to True when this view item is a perennial crop and the previous year is
+                an annual crop and the user wants to indicate that this year's crop (the perennial) is
+                undersown into the previous year's crop (the annual)
             field_system_component_guid: Unique ID for each field component on the farm
             province: CanadianProvince instance
             clay_content: (-) fraction of clay in soil (between 0 and 1)

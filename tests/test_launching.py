@@ -76,7 +76,7 @@ class TestLaunching(unittest.TestCase):
         outputs = [v.name for v in self.path_dir_farms.iterdir() if v.is_dir()]
         self.assertEqual(outputs, self.expected_output_folders)
         for f in ('farm_from_json_Results', 'TotalResultsForAllFarms'):
-            self.assertTrue((path_dir_outputs / 'Outputs' / f).is_dir())
+            self.assertTrue((path_dir_outputs / f).is_dir())
 
     def test_run_on_existing_farm_data(self):
         launching.launch_holos(

@@ -1,5 +1,5 @@
 from datetime import date
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, ClassVar
 
 from pyholos.common import EnumGeneric
@@ -107,9 +107,7 @@ BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, Any], ...] = (
     ("milk_protein_content_as_percentage", "Milk Protein Content As Percentage", None),
     ("diet_additive_type", "Diet Additive Type", None),
     ("methane_conversion_factor_of_diet", "Methane Conversion Factor Of Diet", None),
-
     ("methane_conversion_factor_adjusted", "Methane Conversion Factor Adjusted", 0),  # deprecated
-
     ("feed_intake", "Feed Intake", None),
     ("crude_protein", "Crude Protein", None),
     ("forage", "Forage", None),
@@ -127,20 +125,15 @@ BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, Any], ...] = (
     ("total_nitrogen_kilograms_dry_matter_for_bedding", "Total Nitrogen Kilograms Dry Matter For Bedding", None),
     ("moisture_content_of_bedding_material", "Moisture Content Of Bedding Material", None),
     ("activity_coefficient_of_feeding_situation", "Activity Coefficient Of Feeding Situation", None),
-
     ("maintenance_coefficient", "Maintenance Coefficient", None),  # (MJ day⁻¹ kg⁻¹) C_f_adjusted
-
     ("methane_conversion_factor_of_manure", "Methane Conversion Factor Of Manure", None),
     ("n2o_direct_emission_factor", "N2O Direct Emission Factor", None),
     # (kg N2O-N (kg N)^-1) EF_volatilization
     ("emission_factor_volatilization", "Emission Factor Volatilization", None),
-
     ("volatilization_fraction", "Volatilization Fraction", None),
     ("emission_factor_leaching", "Emission Factor Leaching", None),
     ("fraction_leaching", "Fraction Leaching", None),
-
     ("ash_content", "Ash Content", 8.0),  # deprecated
-
     ("methane_producing_capacity_of_manure", "Methane Producing Capacity Of Manure", None),
     ("fraction_of_organic_nitrogen_immobilized", "Fraction Of Organic Nitrogen Immobilized", None),
     ("fraction_of_organic_nitrogen_nitrified", "Fraction Of Organic Nitrogen Nitrified", None),
@@ -177,7 +170,6 @@ class Beef(BeefBase):
         start_weight: (kg) animal weight at the beginning of the management period
         end_weight: (kg) animal weight at the end of the management period
         bedding_material_type: bedding material type
-
     """
     animal_group: ClassVar[GroupNameInfo]
 
@@ -199,6 +191,11 @@ class Beef(BeefBase):
     average_daily_gain: float | None = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE
+    name: str = field(init=False)
+    group_name: str = field(init=False)
+    group_type: AnimalType = field(init=False)
+    component_type: str = field(init=False)
+    animals_are_milk_fed_only: str = field(init=False)
 
     def get_animal_coefficient_data(self):
         self._animal_coefficient_data = get_beef_and_dairy_cattle_coefficient_data(animal_type=self.group_type)
