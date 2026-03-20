@@ -37,3 +37,7 @@ Issues = "https://github.com/Mon-Systeme-Fourrager/pyholos/issues"
 
 [tool.ruff.format]
 quote-style = "preserve"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term-missing"
