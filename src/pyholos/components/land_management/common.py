@@ -118,6 +118,17 @@ class FertilizerBlends(AutoNameEnum):
     PotassiumSulphate = auto()
 
 
+class FertilizerApplicationMethodologies(AutoNameEnum):
+    """
+    Holos source code:
+        https://github.com/holos-aafc/Holos/blob/main/H.Core/Enumerations/FertilizerApplicationMethodologies.cs
+    """
+    Broadcast = auto()
+    IncorporatedOrPartiallyInjected = auto()
+    Injected = auto()
+    NotSelected = "N/A"
+
+
 def read_energy_table(path_table: Path) -> DataFrame:
     df = read_holos_resource_table(
         path_file=path_table,

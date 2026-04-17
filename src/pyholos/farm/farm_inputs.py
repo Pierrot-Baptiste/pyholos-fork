@@ -26,7 +26,8 @@ from pyholos.components.land_management.carbon.relative_biomass_information impo
     get_relative_biomass_information_data,
     parse_table_7
     )
-from pyholos.components.land_management.common import (FertilizerBlends,
+from pyholos.components.land_management.common import (FertilizerApplicationMethodologies,
+                                                       FertilizerBlends,
                                                        HarvestMethod,
                                                        IrrigationType,
                                                        ManureApplicationTypes,
@@ -518,6 +519,9 @@ class FieldAnnualData(BaseModel):
     evapotranspiration: list[float] | None = None
     precipitation: list[float] | None = None
     temperature: list[float] | None = None
+    moisture_content_of_crop: float | None = None
+    moisture_content_of_crop_percentage: float | None = None
+    fertilizer_application_method: FertilizerApplicationMethodologies = FertilizerApplicationMethodologies.NotSelected
 
     @field_validator('weather_data', mode='after')
     @classmethod
@@ -635,7 +639,10 @@ class FieldsInput(BaseModel):
             manure_application_type=field_one_year_data.manure_application_type,
             manure_animal_source_type=field_one_year_data.manure_animal_source_type,
             manure_state_type=field_one_year_data.manure_state_type,
-            manure_location_source_type=field_one_year_data.manure_location_source_type
+            manure_location_source_type=field_one_year_data.manure_location_source_type,
+            moisture_content_of_crop=field_one_year_data.moisture_content_of_crop,
+            moisture_content_of_crop_percentage=field_one_year_data.moisture_content_of_crop_percentage,
+            fertilizer_application_method=field_one_year_data.fertilizer_application_method
         )
 
     def _create_field_component(
