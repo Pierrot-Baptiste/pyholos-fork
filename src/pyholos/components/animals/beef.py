@@ -1,6 +1,6 @@
 from datetime import date
 from dataclasses import dataclass, field
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypeAliasType
 
 from pyholos.common import EnumGeneric
 from pyholos.components.animals.common import (
@@ -85,67 +85,67 @@ class GroupNameType(EnumGeneric):
     )
 
 
-BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, Any], ...] = (
+BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...] = (
     # (attr_name, holos_name, default)
-    ("name", "Name", "Beef"),
-    ("component_type", "Component Type", COMPONENT_TYPE_ROOT),
-    ("group_name", "Group Name", None),
-    ("group_type", "Group Type", None),
-    ("management_period_name", "Management Period Name", None),
-    ("group_pairing_number", "Group Pairing Number", None),
-    ("management_period_start_date", "Management Period Start Date", None),
-    ("management_period_days", "Management Period Days", None),
-    ("number_of_animals", "Number Of Animals", None),
-    ("production_stage", "Production Stage", None),
-    ("number_of_young_animals", "Number Of Young Animals", None),
-    ("animals_are_milk_fed_only", "Animals Are Milk Fed Only", None),
-    ("start_weight", "Start Weight", None),
-    ("end_weight", "End Weight", None),
-    ("average_daily_gain", "Average Daily Gain", None),
-    ("milk_production", "Milk Production", None),
-    ("milk_fat_content", "Milk Fat Content", None),
-    ("milk_protein_content_as_percentage", "Milk Protein Content As Percentage", None),
-    ("diet_additive_type", "Diet Additive Type", None),
-    ("methane_conversion_factor_of_diet", "Methane Conversion Factor Of Diet", None),
-    ("methane_conversion_factor_adjusted", "Methane Conversion Factor Adjusted", 0),  # deprecated
-    ("feed_intake", "Feed Intake", None),
-    ("crude_protein", "Crude Protein", None),
-    ("forage", "Forage", None),
-    ("tdn", "TDN", None),
-    ("ash_content_of_diet", "Ash Content Of Diet", None),
-    ("starch", "Starch", None),
-    ("fat", "Fat", None),
-    ("me", "ME", None),
-    ("ndf", "NDF", None),
-    ("dietary_net_energy_concentration", "Dietary Net Energy Concentration", None),
-    ("housing_type", "Housing Type", None),
-    ("gain_coefficient", "Gain Coefficient", None),
-    ("user_defined_bedding_rate", "User Defined Bedding Rate", None),
-    ("total_carbon_kilograms_dry_matter_for_bedding", "Total Carbon Kilograms Dry Matter For Bedding", None),
-    ("total_nitrogen_kilograms_dry_matter_for_bedding", "Total Nitrogen Kilograms Dry Matter For Bedding", None),
-    ("moisture_content_of_bedding_material", "Moisture Content Of Bedding Material", None),
-    ("activity_coefficient_of_feeding_situation", "Activity Coefficient Of Feeding Situation", None),
-    ("maintenance_coefficient", "Maintenance Coefficient", None),  # (MJ day⁻¹ kg⁻¹) C_f_adjusted
-    ("methane_conversion_factor_of_manure", "Methane Conversion Factor Of Manure", None),
-    ("n2o_direct_emission_factor", "N2O Direct Emission Factor", None),
+    ("name", "Name", str, "Beef"),
+    ("component_type", "Component Type", str, COMPONENT_TYPE_ROOT),
+    ("group_name", "Group Name", str, None),
+    ("group_type", "Group Type", AnimalType, None),
+    ("management_period_name", "Management Period Name", str, None),
+    ("group_pairing_number", "Group Pairing Number", int, None),
+    ("management_period_start_date", "Management Period Start Date", date, None),
+    ("management_period_days", "Management Period Days", int, None),
+    ("number_of_animals", "Number Of Animals", float, None),
+    ("production_stage", "Production Stage", ProductionStage, None),
+    ("number_of_young_animals", "Number Of Young Animals", int, None),
+    ("animals_are_milk_fed_only", "Animals Are Milk Fed Only", bool, None),
+    ("start_weight", "Start Weight", float, None),
+    ("end_weight", "End Weight", float, None),
+    ("average_daily_gain", "Average Daily Gain", float, None),
+    ("milk_production", "Milk Production", float, None),
+    ("milk_fat_content", "Milk Fat Content", float, None),
+    ("milk_protein_content_as_percentage", "Milk Protein Content As Percentage", float, None),
+    ("diet_additive_type", "Diet Additive Type", DietAdditiveType, None),
+    ("methane_conversion_factor_of_diet", "Methane Conversion Factor Of Diet", float, None),
+    ("methane_conversion_factor_adjusted", "Methane Conversion Factor Adjusted", float, 0),  # deprecated
+    ("feed_intake", "Feed Intake", float, None),
+    ("crude_protein", "Crude Protein", float, None),
+    ("forage", "Forage", float, None),
+    ("tdn", "TDN", float, None),
+    ("ash_content_of_diet", "Ash Content Of Diet", float, None),
+    ("starch", "Starch", float, None),
+    ("fat", "Fat", float, None),
+    ("me", "ME", float, None),
+    ("ndf", "NDF", float, None),
+    ("dietary_net_energy_concentration", "Dietary Net Energy Concentration", float, None),
+    ("housing_type", "Housing Type", HousingType, None),
+    ("gain_coefficient", "Gain Coefficient", float, None),
+    ("user_defined_bedding_rate", "User Defined Bedding Rate", float, None),
+    ("total_carbon_kilograms_dry_matter_for_bedding", "Total Carbon Kilograms Dry Matter For Bedding", float, None),
+    ("total_nitrogen_kilograms_dry_matter_for_bedding", "Total Nitrogen Kilograms Dry Matter For Bedding", float, None),
+    ("moisture_content_of_bedding_material", "Moisture Content Of Bedding Material", float, None),
+    ("activity_coefficient_of_feeding_situation", "Activity Coefficient Of Feeding Situation", float, None),
+    ("maintenance_coefficient", "Maintenance Coefficient", float, None),  # (MJ day⁻¹ kg⁻¹) C_f_adjusted
+    ("methane_conversion_factor_of_manure", "Methane Conversion Factor Of Manure", float, None),
+    ("n2o_direct_emission_factor", "N2O Direct Emission Factor", float, None),
     # (kg N2O-N (kg N)^-1) EF_volatilization
-    ("emission_factor_volatilization", "Emission Factor Volatilization", None),
-    ("volatilization_fraction", "Volatilization Fraction", None),
-    ("emission_factor_leaching", "Emission Factor Leaching", None),
-    ("fraction_leaching", "Fraction Leaching", None),
-    ("ash_content", "Ash Content", 8.0),  # deprecated
-    ("methane_producing_capacity_of_manure", "Methane Producing Capacity Of Manure", None),
-    ("fraction_of_organic_nitrogen_immobilized", "Fraction Of Organic Nitrogen Immobilized", None),
-    ("fraction_of_organic_nitrogen_nitrified", "Fraction Of Organic Nitrogen Nitrified", None),
-    ("fraction_of_organic_nitrogen_mineralized", "Fraction Of Organic Nitrogen Mineralized", None),
-    ("manure_state_type", "Manure State Type", None),
-    ("ammonia_emission_factor_for_manure_storage", "Ammonia Emission Factor For Manure Storage", None),
+    ("emission_factor_volatilization", "Emission Factor Volatilization", float, None),
+    ("volatilization_fraction", "Volatilization Fraction", float, None),
+    ("emission_factor_leaching", "Emission Factor Leaching", float, None),
+    ("fraction_leaching", "Fraction Leaching", float, None),
+    ("ash_content", "Ash Content", float, 8.0),  # deprecated
+    ("methane_producing_capacity_of_manure", "Methane Producing Capacity Of Manure", float, None),
+    ("fraction_of_organic_nitrogen_immobilized", "Fraction Of Organic Nitrogen Immobilized", float, None),
+    ("fraction_of_organic_nitrogen_nitrified", "Fraction Of Organic Nitrogen Nitrified", float, None),
+    ("fraction_of_organic_nitrogen_mineralized", "Fraction Of Organic Nitrogen Mineralized", float, None),
+    ("manure_state_type", "Manure State Type", ManureStateType, None),
+    ("ammonia_emission_factor_for_manure_storage", "Ammonia Emission Factor For Manure Storage", float, None),
 )
 
 
 class BeefBase(AnimalComponent):
     """Base class for beef components.  Only needs to define the ANIMAL_COMPONENT_HOLOS_VAR class variable."""
-    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, Any], ...]] = BEEF_COMPONENT_HOLOS_VAR
+    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, type | TypeAliasType, Any], ...]] = BEEF_COMPONENT_HOLOS_VAR
 
 
 @dataclass

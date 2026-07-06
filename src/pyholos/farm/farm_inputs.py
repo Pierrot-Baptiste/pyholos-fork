@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 from abc import ABC, abstractmethod
-from typing import ClassVar, Generator, Type, Optional, Annotated, Literal
+from typing import ClassVar, Generator, Type, Optional, Annotated, Mapping, Any
 from functools import partial
 from uuid import UUID, uuid4
 
@@ -55,6 +55,7 @@ type DairyCattleComponent = (
     | dairy.DairyLactatingCow
     | dairy.DairyCalves
     | dairy.DairyDryCow
+    | dairy.DairyBulls
 )
 # SheepFlockComponent is a subset of AnimalComponent
 type SheepFlockComponent = (
@@ -130,6 +131,7 @@ class BeefManagementPeriod(BaseModel):
 
 
 class DairyManagementPeriod(BaseModel):
+    # --- Structural Inputs, cannot be automatically generated ---
     name: Annotated[str, Field(min_length=1)]
     start_date: date
     days: Annotated[int, Field(gt=0)]
@@ -142,22 +144,26 @@ class DairyManagementPeriod(BaseModel):
     housing_type: HousingType
     manure_handling_system: ManureStateType
     weather_summary: WeatherSummary
-    start_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
-    end_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
-    average_daily_gain: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
-    diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
-    indoor_barn_temperature: float | Literal["N/A"] = "N/A"
 
-    @field_validator("indoor_barn_temperature", mode="before")
-    def validate_temperature(cls, value):
-        if value in (None, "", "N/A"):
-            return "N/A"
+    # --- Overrides Inputs that can be automatically generated ---
+    holos_overrides: Mapping[str, Any] = Field(default_factory=dict)
+
+    @field_validator("holos_overrides", mode="before")
+    def validate_holos_overrides(cls, value):
+        # Indoor Barn Temperature
+        key_ = "indoor_barn_temperature"
+        if key_ not in value:
+            return value
+        if value[key_] in (None, "", "N/A"):
+            value[key_] = "N/A"
+            return value
         try:
-            float_val = float(value)
+            float_val = float(value[key_])
             if not (-50 <= float_val <= 50):
                 raise ValueError("Temperature must be between -50 and 50.")
-            return float_val
+            value[key_] = float_val
+            return value
         except (TypeError, ValueError):
             raise ValueError("indoor_barn_temperature must be a float or 'N/A'")
 
@@ -333,6 +339,8 @@ class DairyCattleInput(AnimalInputBase):
     LactatingCow: list[DairyManagementPeriod] | None = None
     Calves: list[DairyManagementPeriod] | None = None
     DryCow: list[DairyManagementPeriod] | None = None
+    YoungBulls: list[DairyManagementPeriod] | None = None
+    DairyBulls: list[DairyManagementPeriod] | None = None
 
     @staticmethod
     def map_component(
@@ -341,21 +349,21 @@ class DairyCattleInput(AnimalInputBase):
 
         match component_name:
             case 'Heifers':
-                res = dairy.DairyHeifers
+                return dairy.DairyHeifers
             case 'LactatingCow':
-                res = dairy.DairyLactatingCow
+                return dairy.DairyLactatingCow
             case 'Calves':
-                res = dairy.DairyCalves
+                return dairy.DairyCalves
             case 'DryCow':
-                res = dairy.DairyDryCow
+                return dairy.DairyDryCow
+            case 'DairyBulls':
+                return dairy.DairyBulls
             case _:
                 raise ValueError(f'Unrecognized component name "({component_name})."')
 
-        return res
-
     def filter_inputs(self) -> list[list[str]]:
         return self._filter_inputs(animal_groups=[
-            ["Heifers", "LactatingCow", "Calves", "DryCow"]
+            ["Heifers", "LactatingCow", "Calves", "DryCow", "DairyBulls"],
         ])
 
     @staticmethod
@@ -365,7 +373,7 @@ class DairyCattleInput(AnimalInputBase):
             component_class: Type[DairyCattleComponent],
             management_period: DairyManagementPeriod
     ) -> DairyCattleComponent:
-        return component_class(
+        component = component_class(
             management_period_name=management_period.name,
             group_pairing_number=management_period.group_pairing_number,
             management_period_start_date=management_period.start_date,
@@ -377,12 +385,6 @@ class DairyCattleInput(AnimalInputBase):
             diet=management_period.diet,
             housing_type=management_period.housing_type,
             manure_handling_system=management_period.manure_handling_system,
-            start_weight=management_period.start_weight,
-            end_weight=management_period.end_weight,
-            average_daily_gain=management_period.average_daily_gain,
-            diet_additive_type=management_period.diet_additive_type,
-            bedding_material_type=management_period.bedding_material_type,
-            indoor_barn_temperature=management_period.indoor_barn_temperature,
 
             manure_emission_factors=get_manure_emission_factors(
                 manure_state_type=management_period.manure_handling_system,
@@ -394,8 +396,13 @@ class DairyCattleInput(AnimalInputBase):
                 animal_type=component_class.animal_group.group_type,
                 province=province,
                 year=management_period.weather_summary.year,
-                soil_texture=soil_texture)
+                soil_texture=soil_texture
+            ),
+            bedding_material_type=management_period.bedding_material_type,
+            holos_overrides=management_period.holos_overrides
         )
+
+        return component
 
 
 # region Sheeps Inputs
@@ -531,18 +538,21 @@ class FieldAnnualData(BaseModel):
 
 
 class FieldsInput(BaseModel):
-    fields: FieldAnnualData | list[FieldAnnualData] | None = None
+    """
+    Input for fields in HolosV4.
+    Takes in a single argument, a list of list of FieldAnnualData.
+    Every sublist represents a single field.
+    Every element in the sublist represents a single year for this field.
+    """
+    fields: list[list[FieldAnnualData]] | None = None
     table_7: ClassVar = parse_table_7()
 
     @property
     def fields_data(self) -> Generator[list[FieldAnnualData], None, None]:
         if self.fields is None:
             return
-        else:
-            if not isinstance(self.fields, list):
-                self.fields = [self.fields]
-            for v in self.fields:
-                yield [v]
+        for field_data in self.fields:
+            yield field_data
 
     @staticmethod
     def calc_year_in_perennial_stand(
@@ -586,18 +596,18 @@ class FieldsInput(BaseModel):
         return res
 
     def _create_one_year_component(
-            self,
-            province: CanadianProvince,
-            clay_content: float,
-            sand_content: float,
-            organic_carbon_percentage: float,
-            soil_top_layer_thickness: float,
-            soil_functional_category: SoilFunctionalCategory,
-            perennial_stand_id: UUID,
-            field_system_component_guid: UUID,
-            perennial_stand_length: int,
-            field_one_year_data: FieldAnnualData,
-            year_in_perennial_stand: int,
+        self,
+        province: CanadianProvince,
+        clay_content: float,
+        sand_content: float,
+        organic_carbon_percentage: float,
+        soil_top_layer_thickness: float,
+        soil_functional_category: SoilFunctionalCategory,
+        perennial_stand_id: UUID,
+        field_system_component_guid: UUID,
+        perennial_stand_length: int,
+        field_one_year_data: FieldAnnualData,
+        year_in_perennial_stand: int,
     ) -> CropViewItem:
         weather_data = field_one_year_data.weather_data
 

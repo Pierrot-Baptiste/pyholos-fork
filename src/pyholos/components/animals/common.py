@@ -1,12 +1,12 @@
+from functools import cached_property
 from enum import Enum, auto
 from dataclasses import dataclass
-from typing import ClassVar, Any
+from typing import ClassVar, Any, TypeAliasType
 from datetime import date
 
 from pandas import DataFrame, to_numeric
 from pydantic import BaseModel, Field, NonNegativeFloat
 
-from pyholos import utils
 from pyholos.common import (ClimateZones, EnumGeneric, HolosVar, Region,
                             get_climate_zone, get_region)
 from pyholos.common2 import CanadianProvince
@@ -21,11 +21,15 @@ from pyholos.config import DATE_FMT
 
 
 class AnimalComponent:
-    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, Any], ...]]
+    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, type | TypeAliasType, Any], ...]]
+
+    @cached_property
+    def holos_var_names(self) -> set[str]:
+        return {var_name for var_name, _, _, _ in self.ANIMAL_COMPONENT_HOLOS_VAR}
 
     def to_dict(self) -> dict:
         out = dict()
-        for attr_name, _, _ in self.ANIMAL_COMPONENT_HOLOS_VAR:
+        for attr_name, _, _, _ in self.ANIMAL_COMPONENT_HOLOS_VAR:
             current_value = getattr(self, attr_name, None)
             if not isinstance(current_value, HolosVar):
                 raise ValueError(f"Attribute {attr_name} should be a HolosVar instance")
@@ -55,7 +59,7 @@ class AnimalComponent:
         If value is missing, defaults are used.
 
         """
-        for attribute_name, holos_name, default in self.ANIMAL_COMPONENT_HOLOS_VAR:
+        for attribute_name, holos_name, _, default in self.ANIMAL_COMPONENT_HOLOS_VAR:
             default_value = default(self) if callable(default) else default
             current = getattr(self, attribute_name, None)
             if isinstance(current, HolosVar):
@@ -73,6 +77,31 @@ class AnimalComponent:
     def __init__(self):
         super().__init__()
         self._animal_coefficient_data: AnimalCoefficientData = AnimalCoefficientData()
+
+
+class DietType(str, EnumGeneric):
+    """Holos source code:
+        https://github.com/holos-aafc/Holos/blob/main/H.Content/Resources/Table_18_26_Diet_Coefficients_For_Beef_Dairy_Sheep.csv
+    
+    Used to read Table 18 Diet Coefficients For Beef, Dairy, Sheep
+    """
+    low_energy_protein = "Low Energy/ptn"
+    medium_energy_protein = "Medium Energy/ptn"
+    high_energy_protein = "High Energy/ptn"
+    slow_growth = "Slow Growth"
+    medium_growth = "Medium Growth"
+    barley = "Barley"
+    corn = "Corn"
+    forage_based = "Forage based"
+    legume_forage_based = "Legume forage-based"
+    barley_silage_based = "Barley silage-based"
+    corn_silage_based = "Corn silage-based"
+    close_up = "Close Up"
+    far_off_dry = "Far Off Dry"
+    high_fiber = "High Fiber"
+    low_fiber = "Low fiber"
+    low_energy = "Low Energy"
+    medium_energy = "Medium Energy"
 
 
 class DietAdditiveType(str, EnumGeneric):
@@ -663,7 +692,7 @@ class Diet(BaseModel):
             https://github.com/holos-aafc/Holos/blob/2bc9704a51449a8ffd4005462a6a7e6fb8a27f2d/H.Core/Providers/Feed/Diet.cs#L602
         """
         # Assign a default ym so that if there are no cases that cover the diet below, there will be a value assigned
-        result = 0.4
+        result = 0.04
         total_digestible_nutrient = self.total_digestible_nutrient_percentage
 
         if animal_type.is_dairy_cattle_type():
@@ -747,15 +776,15 @@ class HousingType(str, EnumGeneric):
     confined_no_barn = "ConfinedNoBarn"
     """Also known as 'Confined no barn (feedlot)'
     """
-    housed_in_barn = "HousedInBarn"
+    housed_in_barn = "HousedInBarn"  #[Obsolete for dairy cattle]
     housed_ewes = "HousedEwes"
     housed_in_barn_solid = "HousedInBarnSolid"
-    housed_in_barn_slurry = "HousedInBarnSlurry"
+    housed_in_barn_slurry = "HousedInBarnSlurry"  #[Obsolete for dairy cattle]
     enclosed_pasture = "EnclosedPasture"
     open_range_or_hills = "OpenRangeOrHills"
-    tie_stall = "TieStall"
-    small_free_stall = "SmallFreeStall"
-    large_free_stall = "LargeFreeStall"
+    tie_stall = "TieStall"  #[Obsolete for dairy cattle]
+    small_free_stall = "SmallFreeStall"  #[Obsolete for dairy cattle]
+    large_free_stall = "LargeFreeStall"  #[Obsolete for dairy cattle]
     grazing_under3km = "GrazingUnder3km"
     grazing_over3km = "GrazingOver3km"
     confined = "Confined"
@@ -875,6 +904,11 @@ class Bedding:
             bedding_material_type=bedding_material_type,
             animal_type=animal_type)
 
+        if bedding_material_type == BeddingMaterialType.NONE:
+            total_carbon_kilograms_dry_matter_for_bedding = 0
+            total_nitrogen_kilograms_dry_matter_for_bedding = 0
+            moisture_content_of_bedding_material = 0
+
         if total_carbon_kilograms_dry_matter_for_bedding is None:
             total_carbon_kilograms_dry_matter_for_bedding = default_bedding_material_composition[
                 'TotalCarbonKilogramsDryMatter']
@@ -889,16 +923,21 @@ class Bedding:
             value=self.get_default_bedding_rate(
                 housing_type=housing_type,
                 bedding_material_type=bedding_material_type,
-                animal_type=animal_type))
+                animal_type=animal_type
+            )
+        )
         self.total_carbon_kilograms_dry_matter_for_bedding = HolosVar(
             name='Total Carbon Kilograms Dry Matter For Bedding',
-            value=total_carbon_kilograms_dry_matter_for_bedding)
+            value=total_carbon_kilograms_dry_matter_for_bedding
+        )
         self.total_nitrogen_kilograms_dry_matter_for_bedding = HolosVar(
             name='Total Nitrogen Kilograms Dry Matter For Bedding',
-            value=total_nitrogen_kilograms_dry_matter_for_bedding)
+            value=total_nitrogen_kilograms_dry_matter_for_bedding
+        )
         self.moisture_content_of_bedding_material = HolosVar(
             name='Moisture Content Of Bedding Material',
-            value=moisture_content_of_bedding_material)
+            value=moisture_content_of_bedding_material
+        )
 
     @staticmethod
     def get_default_bedding_rate(
@@ -907,6 +946,8 @@ class Bedding:
             animal_type: AnimalType
     ) -> int | float:
         # https://github.com/holos-aafc/Holos/blob/53f778f9bd4579d164de10f5b04db34d020b96a9/H.Core/Providers/Animals/Table_30_Default_Bedding_Material_Composition_Provider.cs#L301
+        if bedding_material_type == BeddingMaterialType.NONE:
+            return 0
 
         if housing_type.is_pasture():
             return 0
@@ -1280,7 +1321,8 @@ def get_fraction_of_organic_nitrogen_mineralized_data(
     """Table 44. Fraction of organic N mineralized as TAN and the fraction of TAN immobilized to organic N and nitrified
     and denitrified during solid and liquid manure storage for beef and dairy cattle (based on TAN content)
     (Chai et al., 2014,2016).
-
+    Source Code:
+        https://github.com/holos-aafc/Holos/blob/main/H.Core/Providers/Animals/Table_44_Fraction_OrganicN_Mineralized_As_Tan_Provider.cs#L28
     Args:
         state_type: manure handling system type
         animal_type: animal type
@@ -2252,8 +2294,8 @@ class ManureComposition:
 
 
 def get_default_manure_composition_data(
-        animal_type: AnimalType,
-        manure_state_type: ManureStateType
+    animal_type: AnimalType,
+    manure_state_type: ManureStateType
 ) -> ManureComposition:
     """Returns the default manure composition values depending on animal type and manure state (handling system) type
 
@@ -2388,6 +2430,18 @@ def read_table_6():
     return manure_composition_data.set_index(['animal_type', 'manure_state_type'])
 
 
+def read_table_18():
+    # Load the table
+    diet_coefficients = read_holos_resource_table(
+        path_file=PathsHolosResources.Table_18_Diet_Coefficients_For_Beef_Dairy_Sheep
+    )
+    # Clean the AnimalType column
+    regex = r" \(\d*\)"
+    diet_coefficients['AnimalType'] = diet_coefficients['AnimalType'].str.replace(regex, "", regex=True)
+    diet_coefficients["DietType"] = diet_coefficients['DietType'].str.replace(regex, "", regex=True)
+    return diet_coefficients
+
+
 def read_table_29():
     excretion_rates = read_holos_resource_table(
         path_file=PathsHolosResources.Table_29_Percentage_Total_Manure_Produced_In_Systems)
@@ -2400,7 +2454,10 @@ class HolosTables:
     Table_16_Livestock_Coefficients_BeefAndDairy_Cattle_Provider = read_holos_resource_table(
         path_file=PathsHolosResources.Table_16_Livestock_Coefficients_BeefAndDairy_Cattle_Provider,
         index_col="AnimalType")
-    Table_21_Average_Milk_Production_For_Dairy_Cows_By_Province = utils.read_holos_resource_table(
+    Table_18_Diet_Coefficients_For_Beef_Dairy_Sheep: DataFrame = read_holos_resource_table(
+        path_file=PathsHolosResources.Table_18_Diet_Coefficients_For_Beef_Dairy_Sheep,
+        index_col="AnimalType")
+    Table_21_Average_Milk_Production_For_Dairy_Cows_By_Province = read_holos_resource_table(
         path_file=PathsHolosResources.Table_21_Average_Milk_Production_For_Dairy_Cows_By_Province,
         index_col='Year')
     Table_29_Percentage_Total_Manure_Produced_In_Systems = read_table_29()

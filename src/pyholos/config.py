@@ -20,6 +20,8 @@ class PathsHolosResources:
         'Table_9_Default_Values_For_Nitrogen_Lignin_In_Crops.csv')
     Table_16_Livestock_Coefficients_BeefAndDairy_Cattle_Provider = _path_root / (
         'Table_16_Livestock_Coefficients_BeefAndDairy_Cattle_Provider.csv')
+    Table_18_Diet_Coefficients_For_Beef_Dairy_Sheep = _path_root / (
+        'Table_18_26_Diet_Coefficients_For_Beef_Dairy_Sheep.csv')
     Table_21_Average_Milk_Production_For_Dairy_Cows_By_Province = _path_root / (
         'Table_21_Average_Milk_Production_For_Dairy_Cows_By_Province.csv')
     Table_22_Livestock_Coefficients_For_Sheep = _path_root / (
