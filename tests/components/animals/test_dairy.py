@@ -48,10 +48,17 @@ class MyTestCase(unittest.TestCase):
     ):
         for k, v in self.non_regression_data.loc[group_name].to_dict().items():
             v = str(v).upper() if isinstance(v, bool) else v
-            self.assertAlmostEqual(
-                v,
-                res[k],
-                places=3)
+            try:
+                self.assertAlmostEqual(
+                    v,
+                    res[k],
+                    places=3)
+            except Exception:
+                print()
+                print(f"Column: {k}")
+                print(f"Expected: {v}  ({type(v)})")
+                print(f"Actual: {res[k]}  ({type(res[k])})")
+                raise
 
     def test_dairy_heifers(self):
         manure_state_type = common.ManureStateType.daily_spread
@@ -73,11 +80,19 @@ class MyTestCase(unittest.TestCase):
                 year=2025,
                 manure_state_type=manure_state_type,
                 **self.manure_emission_kwargs),
-            bedding_material_type=self.bedding_material_type
+            diet_additive_type=common.DietAdditiveType.NONE,
+            bedding_material_type=self.bedding_material_type,
+            # Expects indoor barn temperature of 25, but I think we should default to N/A if we don't
+            # make it an explicit argument for dairy inputs. Can still be overridden.
+            # Tests expects use_custom_indoor_barn_temperature to be False...
+            holos_overrides={
+                "indoor_barn_temperature": 25.0,
+                "use_custom_indoor_housing_temperature": False
+            }
         )
 
         self.run_test(
-            group_name=dairy_heifers.group_name.value,
+            group_name=dairy_heifers.animal_group.group_name,
             res=dairy_heifers.to_dict()
         )
 
@@ -106,11 +121,17 @@ class MyTestCase(unittest.TestCase):
                 year=2025,
                 manure_state_type=manure_state_type,
                 **self.manure_emission_kwargs),
-            bedding_material_type=self.bedding_material_type
+            diet_additive_type=common.DietAdditiveType.NONE,
+            bedding_material_type=self.bedding_material_type,
+                        holos_overrides={
+                "indoor_barn_temperature": 25.0,
+                "use_custom_indoor_housing_temperature": False
+            }
+
         )
 
         self.run_test(
-            group_name=dairy_lactating_cow.group_name.value,
+            group_name=dairy_lactating_cow.animal_group.group_name,
             res=dairy_lactating_cow.to_dict()
         )
 
@@ -134,11 +155,17 @@ class MyTestCase(unittest.TestCase):
                 year=2025,
                 manure_state_type=manure_state_type,
                 **self.manure_emission_kwargs),
-            bedding_material_type=self.bedding_material_type
+            diet_additive_type=common.DietAdditiveType.NONE,
+            bedding_material_type=self.bedding_material_type,
+                        holos_overrides={
+                "indoor_barn_temperature": 25.0,
+                "use_custom_indoor_housing_temperature": False
+            }
+
         )
 
         self.run_test(
-            group_name=dairy_calves.group_name.value,
+            group_name=dairy_calves.animal_group.group_name,
             res=dairy_calves.to_dict()
         )
 
@@ -162,11 +189,17 @@ class MyTestCase(unittest.TestCase):
                 year=2025,
                 manure_state_type=manure_state_type,
                 **self.manure_emission_kwargs),
-            bedding_material_type=self.bedding_material_type
+            diet_additive_type=common.DietAdditiveType.NONE,
+            bedding_material_type=self.bedding_material_type,
+                        holos_overrides={
+                "indoor_barn_temperature": 25.0,
+                "use_custom_indoor_housing_temperature": False
+            }
+
         )
 
         self.run_test(
-            group_name=dairy_dry_cow.group_name.value,
+            group_name=dairy_dry_cow.animal_group.group_name,
             res=dairy_dry_cow.to_dict()
         )
 
@@ -212,6 +245,7 @@ class TestDairyRefactorUnit(unittest.TestCase):
                 province=province,
                 soil_texture=common.SoilTexture.Fine,
             ),
+            diet_additive_type=common.DietAdditiveType.NONE,
             bedding_material_type=common.BeddingMaterialType.sand,
         )
         base_kwargs.update(overrides)
@@ -228,9 +262,9 @@ class TestDairyRefactorUnit(unittest.TestCase):
 
         # Option: vérifier que les objets HolosVar ne sont pas recréés
         # (nécessite que _fix_holos_vars mette à jour in-place si HolosVar déjà là)
-        before = {attr: getattr(obj, attr) for (attr, _, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR}
+        before = {attr: getattr(obj, attr) for (attr, _, _, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR}
         obj._fix_holos_vars()
-        after = {attr: getattr(obj, attr) for (attr, _, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR}
+        after = {attr: getattr(obj, attr) for (attr, _, _, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR}
         for attr in before:
             self.assertIs(before[attr], after[attr], f"HolosVar for '{attr}' should be updated in-place, not recreated")
 
@@ -276,7 +310,7 @@ class TestDairyRefactorUnit(unittest.TestCase):
     def test_all_schema_columns_present(self):
         obj = self.make_heifers()
         out = obj.to_dict()
-        expected_columns = [csv_name for (_, csv_name, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR]
+        expected_columns = [csv_name for (_, csv_name, _, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR]
         for col in expected_columns:
             self.assertIn(col, out, f"Column '{col}' declared in schema should be present in to_dict()")
 
@@ -304,7 +338,7 @@ class TestDairyRefactorUnit(unittest.TestCase):
         # On insère temporairement un champ de spec avec default callable
         # qui dépend de l'instance (ex: renvoyer group_name sous une autre clé)
         tmp_schema = list(deepcopy(dairy.DAIRY_COMPONENT_HOLOS_VAR))
-        tmp_schema.append(("synthetic_field", "Synthetic Field", lambda self: f"{self.group_name}-X"))
+        tmp_schema.append(("synthetic_field", "Synthetic Field", str, lambda self: f"{self.group_name}-X"))
 
         try:
             obj = self.make_heifers()

@@ -1,5 +1,6 @@
 major = 0
-minor = 1
-post = 4
+minor = 4
+post = 1
+patch = ""
 
-__version__ = ".".join([str(s) for s in (major, minor, post)])
+__version__ = f'{major}.{minor}.{post}' + (f'.{patch}' if patch != "" else '')

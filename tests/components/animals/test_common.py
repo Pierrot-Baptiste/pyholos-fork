@@ -709,6 +709,8 @@ class TestBedding(unittest.TestCase):
             for bedding_material_type, housing_type in product(
                     common.BeddingMaterialType,
                     housing_types):
+                if bedding_material_type == common.BeddingMaterialType.NONE:
+                    continue
                 self.assertEqual(
                     0.57,
                     common.Bedding(
@@ -734,6 +736,8 @@ class TestBedding(unittest.TestCase):
                     animal_type=animal_type).user_defined_bedding_rate.value)
 
             for bedding_material_type in bedding_material_types:
+                if bedding_material_type == common.BeddingMaterialType.NONE:
+                    continue
                 self.assertEqual(
                     0.79,
                     common.Bedding(
@@ -775,6 +779,8 @@ class TestBedding(unittest.TestCase):
                 [v for v in animal_types if v not in set(animal_types_to_exclude)],
                 bedding_material_types,
                 housing_types):
+            if bedding_material_type == common.BeddingMaterialType.NONE:
+                continue
             self.assertEqual(
                 0,
                 common.Bedding(
@@ -796,6 +802,8 @@ class TestBedding(unittest.TestCase):
                     (common.AnimalType.horses, 1.5),
                     (common.AnimalType.mules, 1.5),
                     (common.AnimalType.bison, 1.5)):
+                if bedding_material_type == common.BeddingMaterialType.NONE:
+                    continue
                 self.assertEqual(
                     expected_value,
                     common.Bedding(
@@ -809,6 +817,8 @@ class TestBedding(unittest.TestCase):
                 if all([
                     animal_type not in animal_types_to_exclude,
                     not animal_type.is_young_type()]):
+                    if bedding_material_type == common.BeddingMaterialType.NONE:
+                        continue
                     self.assertEqual(
                         1,
                         common.Bedding(
@@ -3523,7 +3533,7 @@ class TestGetBeefAndDairyCattleCoefficientData(unittest.TestCase):
             expected_default_initial_weight: float,
             expected_default_final_weight: float
     ) -> None:
-        _animal_coefficient_data = common.get_beef_and_dairy_cattle_coefficient_data(animal_type=animal_type.value)
+        _animal_coefficient_data = common.get_beef_and_dairy_cattle_coefficient_data(animal_type=animal_type)
         self.assertEqual(
             expected_baseline_maintenance_coefficient,
             _animal_coefficient_data.baseline_maintenance_coefficient)

@@ -38,27 +38,27 @@ class ParamGeneric:
 
 class ParamsGeneral(ParamGeneric):
     def __init__(
-            self,
-            polygon_id: int,
-            latitude: float,
-            longitude: float,
-            yield_assignment_method: YieldAssignmentMethod = YieldAssignmentMethod.SmallAreaData,
-            path_to_custom_yield_input_file: str = '',
-            use_custom_starting_soil_organic_carbon_value: bool = False,
-            starting_soc_value: float = 0,
-            residue_input_calculation_method: ResidueInputCalculationMethod = ResidueInputCalculationMethod.Default,
-            soil_data_acquisition_method: SoilDataAcquisitionMethod = SoilDataAcquisitionMethod.Default,
-            carbon_concentration: float = 0.45,
-            emergence_day: int = 141,
-            ripening_day: int = 197,
-            variance: float | float = 300,
-            alfa: float = 0.7,
-            decomposition_minimum_temperature: float = -3.78,
-            decomposition_maximum_temperature: float = 30,
-            moisture_response_function_at_saturation: float = 0.42,
-            moisture_response_function_at_wilting_point: float = 0.18,
-            **kwargs
-            ):
+        self,
+        polygon_id: int,
+        latitude: float,
+        longitude: float,
+        yield_assignment_method: YieldAssignmentMethod = YieldAssignmentMethod.SmallAreaData,
+        path_to_custom_yield_input_file: str = '',
+        use_custom_starting_soil_organic_carbon_value: bool = False,
+        starting_soc_value: float = 0,
+        residue_input_calculation_method: ResidueInputCalculationMethod = ResidueInputCalculationMethod.Default,
+        soil_data_acquisition_method: SoilDataAcquisitionMethod = SoilDataAcquisitionMethod.Default,
+        carbon_concentration: float = 0.45,
+        emergence_day: int = 141,
+        ripening_day: int = 197,
+        variance: float | float = 300,
+        alfa: float = 0.7,
+        decomposition_minimum_temperature: float = -3.78,
+        decomposition_maximum_temperature: float = 30,
+        moisture_response_function_at_saturation: float = 0.42,
+        moisture_response_function_at_wilting_point: float = 0.18,
+        **kwargs
+    ):
         super().__init__(title="General")
 
         self.yield_assignment_method = FarmSettingsVar(

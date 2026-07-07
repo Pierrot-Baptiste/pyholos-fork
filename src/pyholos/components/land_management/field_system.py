@@ -82,6 +82,7 @@ class LandManagementBase(Component):
         self.percentage_of_straw_returned_to_soil = HolosVar(name='PercentageOfStrawReturnedToSoil')
         self.percentage_of_roots_returned_to_soil = HolosVar(name='PercentageOfRootsReturnedToSoil')
         self.percentage_of_product_yield_returned_to_soil = HolosVar(name='PercentageOfProductYieldReturnedToSoil')
+        self.percentage_of_extraroots_returned_to_soil = HolosVar(name='PercentageOfExtrarootsReturnedToSoil')
         self.is_pesticide_used = HolosVar(name='Is Pesticide Used')
         self.number_of_pesticide_passes = HolosVar(name='Number Of Pesticide Passes')
         self.manure_applied = HolosVar(name='Manure Applied')
@@ -348,6 +349,7 @@ class CropViewItem(LandManagementBase):
         organic_carbon_percentage: float,
         soil_top_layer_thickness: float,
         soil_functional_category: SoilFunctionalCategory,
+        fertilizer_application_method: FertilizerApplicationMethodologies,
         fertilizer_blend: FertilizerBlends,
         evapotranspiration: list[float],
         precipitation: list[float],
@@ -361,9 +363,10 @@ class CropViewItem(LandManagementBase):
         manure_state_type: ManureStateType = ManureStateType.not_selected,
         manure_location_source_type: ManureLocationSourceType = ManureLocationSourceType.NotSelected,
 
+        percentage_of_extraroots_returned_to_soil: float = 100.,
+
         moisture_content_of_crop: float | None = None,
         moisture_content_of_crop_percentage: float | None = None,
-        fertilizer_application_method: FertilizerApplicationMethodologies = FertilizerApplicationMethodologies.NotSelected
     ):
         """
 
@@ -395,10 +398,12 @@ class CropViewItem(LandManagementBase):
             organic_carbon_percentage: (%) percentage of organic C in soil (between 0 and 100)
             soil_top_layer_thickness: (mm) thickness of the soil top layer
             soil_functional_category: SoilFunctionalCategory instance
+            fertilizer_application_method: FertilizerApplicationMethodologies instance
             fertilizer_blend: FertilizerBlends instance
             evapotranspiration: (mm/d) all-year daily values of reference crop evapotranspiration
             precipitation: (mm/d) all-year values of precipitation
             temperature: (degrees Celsius) all-year values of air temperature
+
             amount_of_irrigation: (mm/ha) total amount of irrigation
             number_of_pesticide_passes: number of pesticide passes
             amount_of_manure_applied: (kg/ha) amount of manure applied to the field
@@ -406,6 +411,12 @@ class CropViewItem(LandManagementBase):
             manure_animal_source_type: ManureAnimalSourceTypes instance
             manure_state_type: ManureStateType instance
             manure_location_source_type: ManureLocationSourceType instance
+
+            percentage_of_extraroots_returned_to_soil: (-) fraction of extraroots returned to soil (between 0 and 1)
+
+            moisture_content_of_crop: (-) fraction of moisture content in crop (between 0 and 1)
+            moisture_content_of_crop_percentage: (%) percentage of moisture content in crop (between 0 and 1). In None,
+                a default value is inferred from the crop type and harvest method.
         """
         super().__init__()
 
@@ -440,6 +451,7 @@ class CropViewItem(LandManagementBase):
         else:
             self.moisture_content_of_crop_percentage.value = moisture_content_of_crop_percentage
 
+        self.percentage_of_extraroots_returned_to_soil.value = percentage_of_extraroots_returned_to_soil
         self.set_percentage_returns()
         self.number_of_pesticide_passes.value = number_of_pesticide_passes
         self.is_pesticide_used.value = "Yes" if number_of_pesticide_passes > 0 else "No"
@@ -464,6 +476,7 @@ class CropViewItem(LandManagementBase):
             tillage_type=tillage_type,
             crop_type=crop_type)
         self.fertilizer_blend.value = fertilizer_blend
+        self.fertilizer_application_method.value = fertilizer_application_method.value
 
         is_perennial = crop_type.is_perennial()
         self.climate_parameter.value = calculate_climate_parameter(
@@ -494,4 +507,3 @@ class CropViewItem(LandManagementBase):
 
         self.sand.value = sand_content
         self.lignin.value = relative_biomass_information_data.lignin_content
-        self.fertilizer_application_method.value = fertilizer_application_method

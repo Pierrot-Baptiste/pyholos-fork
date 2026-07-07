@@ -71,7 +71,7 @@ DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...
     ("milk_production", "Milk Production", float, None),
     ("milk_fat_content", "Milk Fat Content", float, None),
     ("milk_protein_content_as_percentage", "Milk Protein Content As Percentage", float, None),
-    ("diet_additive_type", "Diet Additive Type", DietAdditiveType,None),
+    ("diet_additive_type", "Diet Additive Type", DietAdditiveType, None),
     ("methane_conversion_factor_of_diet", "Methane Conversion Factor Of Diet", float, None),
     ("methane_conversion_factor_adjusted", "Methane Conversion Factor Adjusted", float, 0),  # Deprecated
     ("feed_intake", "Feed Intake", float, 0),
@@ -114,7 +114,9 @@ DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...
 )
 
 class DairyBase(AnimalComponent):
-    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, type | TypeAliasType, Any], ...]] = DAIRY_COMPONENT_HOLOS_VAR
+    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[
+        tuple[tuple[str, str, type | TypeAliasType, Any], ...]
+    ] = DAIRY_COMPONENT_HOLOS_VAR
 
 
 @dataclass
@@ -126,7 +128,7 @@ class Dairy(DairyBase, ABC):
 
     Note: I believe this class should not be abstract anymore and become the only class.
         the restriction to predefined animal types is arbitrary and should be removed.
-        Or not, the animal types seem to be used in lookup tables.
+        Or not, the animal types might be used in lookup tables. To investigate.
 
     Args:
         management_period_name: given name for the management period
@@ -161,13 +163,15 @@ class Dairy(DairyBase, ABC):
     housing_type: HousingType
     manure_handling_system: ManureStateType
     manure_emission_factors: LivestockEmissionConversionFactorsData
+    diet_additive_type: DietAdditiveType
     bedding_material_type: BeddingMaterialType
+    start_weight: float | None = None
+    end_weight: float | None = None
+    average_daily_gain: float | None = None
 
     holos_overrides: Mapping[str, Any] = field(default_factory=dict)
 
     group_type: AnimalType = field(init=False)
-    start_weight: float = field(init=False)
-    end_weight: float = field(init=False)
     indoor_barn_temperature: FloatOrNA = field(init=False)
 
     def update_holos_var(self, var_name: str, value: Any) -> None:
@@ -199,9 +203,17 @@ class Dairy(DairyBase, ABC):
         self.update_holos_var("gain_coefficient", self._animal_coefficient_data.gain_coefficient)
 
         # --- Animal Weights & Growth ---
-        self.update_holos_var("start_weight", self._animal_coefficient_data.default_initial_weight)
-        self.update_holos_var("end_weight", self._animal_coefficient_data.default_final_weight)
-        self.update_holos_var("average_daily_gain", (self.end_weight - self.start_weight) / self.management_period_days)
+        if self.start_weight is None:
+            self.start_weight = self._animal_coefficient_data.default_initial_weight
+        if self.end_weight is None:
+            self.end_weight = self._animal_coefficient_data.default_final_weight
+        if self.average_daily_gain is None:
+            self.average_daily_gain = (self.end_weight - self.start_weight) / self.management_period_days
+
+        # In case start_weight, end_weight and average_daily_gain are provided in holos_overrides
+        self.update_holos_var("start_weight", self.start_weight)
+        self.update_holos_var("end_weight", self.end_weight)
+        self.update_holos_var("average_daily_gain", self.average_daily_gain)
 
         # --- Milk Production ---
         self.update_holos_var("milk_production", self.milk_data.production)
@@ -289,14 +301,35 @@ class Dairy(DairyBase, ABC):
         )
 
         self.update_holos_var("indoor_barn_temperature", "N/A")
-        self.update_holos_var("use_custom_indoor_housing_temperature", False if self.indoor_barn_temperature == "N/A" else True)
+        self.update_holos_var(
+            "use_custom_indoor_housing_temperature",
+            False if self.indoor_barn_temperature == "N/A" else True
+        )
 
-        self.update_holos_var("methane_conversion_factor_of_manure", self.manure_emission_factors.MethaneConversionFactor)
-        self.update_holos_var("n2o_direct_emission_factor", self.manure_emission_factors.N2ODirectEmissionFactor)
-        self.update_holos_var("volatilization_fraction", self.manure_emission_factors.VolatilizationFraction)
-        self.update_holos_var("emission_factor_volatilization", self.manure_emission_factors.EmissionFactorVolatilization)
-        self.update_holos_var("fraction_leaching", self.manure_emission_factors.LeachingFraction)
-        self.update_holos_var("emission_factor_leaching", self.manure_emission_factors.EmissionFactorLeach)
+        self.update_holos_var(
+            "methane_conversion_factor_of_manure",
+            self.manure_emission_factors.MethaneConversionFactor
+        )
+        self.update_holos_var(
+            "n2o_direct_emission_factor",
+            self.manure_emission_factors.N2ODirectEmissionFactor
+        )
+        self.update_holos_var(
+            "volatilization_fraction",
+            self.manure_emission_factors.VolatilizationFraction
+        )
+        self.update_holos_var(
+            "emission_factor_volatilization",
+            self.manure_emission_factors.EmissionFactorVolatilization
+        )
+        self.update_holos_var(
+            "fraction_leaching",
+            self.manure_emission_factors.LeachingFraction
+        )
+        self.update_holos_var(
+            "emission_factor_leaching",
+            self.manure_emission_factors.EmissionFactorLeach
+        )
 
         self.update_holos_var("volatile_solid_adjusted", 1)
         self.update_holos_var("nitrogen_excretion_adjusted", 1)

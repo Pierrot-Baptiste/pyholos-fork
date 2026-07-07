@@ -9,6 +9,7 @@ from example.extended_usage.field_inputs import set_field_data
 from example.extended_usage.sheep_inputs import set_sheep_data
 from pyholos.farm.farm import create_farm
 from pyholos.farm.farm_inputs import WeatherData, WeatherSummary
+from pyholos.launching import launch_holos
 
 
 def get_weather_data(df: DataFrame) -> WeatherData:
@@ -52,4 +53,14 @@ if __name__ == '__main__':
         fields_data=set_field_data(weather_data=get_weather_data(df=weather_df))
     )
 
-    farm.write_files(path_dir_farm=path_root / 'farm_data/example_farm')
+    path_dir_farms = path_root / 'farm_data'
+
+    farm.write_files(path_dir_farm=path_dir_farms / 'example_farm')
+
+    launch_holos(
+        path_dir_farms=path_dir_farms,
+        name_farm_json=None,
+        name_dir_farms_json=None,
+        name_settings=None,
+        path_dir_outputs=path_root / 'output',
+        id_slc_polygon=None)

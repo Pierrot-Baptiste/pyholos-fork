@@ -125,7 +125,7 @@ class FertilizerApplicationMethodologies(AutoNameEnum):
     """
     Broadcast = auto()
     IncorporatedOrPartiallyInjected = auto()
-    Injected = auto()
+    FullyInjected = auto()
     NotSelected = "N/A"
 
 

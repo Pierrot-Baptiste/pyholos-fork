@@ -82,7 +82,7 @@ class AnimalComponent:
 class DietType(str, EnumGeneric):
     """Holos source code:
         https://github.com/holos-aafc/Holos/blob/main/H.Content/Resources/Table_18_26_Diet_Coefficients_For_Beef_Dairy_Sheep.csv
-    
+
     Used to read Table 18 Diet Coefficients For Beef, Dairy, Sheep
     """
     low_energy_protein = "Low Energy/ptn"

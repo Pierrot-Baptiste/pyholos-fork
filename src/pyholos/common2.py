@@ -133,8 +133,14 @@ def get_dominant_component_properties(
         id_polygon: int,
         slc_components_table: DataFrame
 ) -> dict[str, str]:
-    return slc_components_table[slc_components_table['POLY_ID'] == id_polygon].sort_values(
-        by='PERCENT_', ascending=False).iloc[0].astype(str).to_dict()
+    result = slc_components_table[
+        slc_components_table['POLY_ID'] == id_polygon
+    ].sort_values(
+        by='PERCENT_',
+        ascending=False
+    ).iloc[0].astype(str).to_dict()
+
+    return {str(k): v for k, v in result.items()}
 
 
 def get_soil_layer_table(

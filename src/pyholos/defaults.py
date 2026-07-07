@@ -116,7 +116,7 @@ class Defaults:
     MoistureResponseFunctionAtSaturation = 0.42
     """(mm3/mm3) soil volumetric water content at reference saturation"""
 
-    ClimateFilename = "climate_data.csv"
+    ClimateFilename = "climate.csv"
     """Default name for climate data file"""
 
     UseClimateParameterInsteadOfManagementFactor = True

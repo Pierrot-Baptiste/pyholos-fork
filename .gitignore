@@ -164,11 +164,13 @@ cython_debug/
 misc/
 docs/_build
 
-example/extended_usage/farm_data/*
+example/extended_usage/farm_data/
+example/extended_usage/output/
 example/minimal_usage/*
 !example/minimal_usage/farm_data
 example/minimal_usage/farm_data/*
 !example/minimal_usage/farm_data/farm.json
 !example/minimal_usage/main.py
 src/pyholos/resources/soil_landscapes_of_canada_v3r2
+src/pyholos/resources/holos4_cli
 **/UserFarmsPath.txt

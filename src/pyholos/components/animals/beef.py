@@ -1,6 +1,7 @@
 from datetime import date
 from dataclasses import dataclass, field
 from typing import Any, ClassVar, TypeAliasType
+from uuid import UUID
 
 from pyholos.common import EnumGeneric
 from pyholos.components.animals.common import (
@@ -105,6 +106,7 @@ BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...]
     ("milk_production", "Milk Production", float, None),
     ("milk_fat_content", "Milk Fat Content", float, None),
     ("milk_protein_content_as_percentage", "Milk Protein Content As Percentage", float, None),
+    ("diet_name", "Diet Name", str, None),
     ("diet_additive_type", "Diet Additive Type", DietAdditiveType, None),
     ("methane_conversion_factor_of_diet", "Methane Conversion Factor Of Diet", float, None),
     ("methane_conversion_factor_adjusted", "Methane Conversion Factor Adjusted", float, 0),  # deprecated
@@ -126,6 +128,7 @@ BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...]
     ("moisture_content_of_bedding_material", "Moisture Content Of Bedding Material", float, None),
     ("activity_coefficient_of_feeding_situation", "Activity Coefficient Of Feeding Situation", float, None),
     ("maintenance_coefficient", "Maintenance Coefficient", float, None),  # (MJ day⁻¹ kg⁻¹) C_f_adjusted
+    ("pasture_location", "Pasture Location", UUID, None),
     ("methane_conversion_factor_of_manure", "Methane Conversion Factor Of Manure", float, None),
     ("n2o_direct_emission_factor", "N2O Direct Emission Factor", float, None),
     # (kg N2O-N (kg N)^-1) EF_volatilization
@@ -145,7 +148,9 @@ BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...]
 
 class BeefBase(AnimalComponent):
     """Base class for beef components.  Only needs to define the ANIMAL_COMPONENT_HOLOS_VAR class variable."""
-    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[tuple[tuple[str, str, type | TypeAliasType, Any], ...]] = BEEF_COMPONENT_HOLOS_VAR
+    ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[
+        tuple[tuple[str, str, type | TypeAliasType, Any], ...]
+    ] = BEEF_COMPONENT_HOLOS_VAR
 
 
 @dataclass
@@ -182,6 +187,7 @@ class Beef(BeefBase):
     number_of_young_animals: int
     is_milk_fed_only: bool
     milk_data: Milk
+    diet_name: str
     diet: Diet
     housing_type: HousingType
     manure_handling_system: ManureStateType
@@ -196,6 +202,7 @@ class Beef(BeefBase):
     group_type: AnimalType = field(init=False)
     component_type: str = field(init=False)
     animals_are_milk_fed_only: str = field(init=False)
+    pasture_location: str | UUID | None = None
 
     def get_animal_coefficient_data(self):
         self._animal_coefficient_data = get_beef_and_dairy_cattle_coefficient_data(animal_type=self.group_type)
@@ -209,6 +216,11 @@ class Beef(BeefBase):
 
     def __post_init__(self):
         # TODO: A lot of repetition with Dairy component here. Could centralise the logic of shared work
+        if self.pasture_location is None:
+            assert self.housing_type != HousingType.pasture, (
+                "Pasture location must be specified (UUID). "
+                "Ensure that the same UUID is set to an existing field data under 'Field System Component Guid'")
+
         super().__init__()
         # Handling of animal group info (defined at class level)
         self.name = f"Beef {self.animal_group.name.strip()}"
@@ -295,6 +307,8 @@ class Beef(BeefBase):
         self.ammonia_emission_factor_for_manure_storage = (
             get_ammonia_emission_factor_for_storage_of_beef_and_dairy_cattle_manure(
                 storage_type=self.manure_handling_system))
+
+        self.pasture_location = str(self.pasture_location) if self.pasture_location is not None else "N/A"
 
         self.methane_conversion_factor_of_manure = self.manure_emission_factors.MethaneConversionFactor
         self.n2o_direct_emission_factor = self.manure_emission_factors.N2ODirectEmissionFactor

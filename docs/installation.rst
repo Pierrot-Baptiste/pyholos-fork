@@ -87,26 +87,6 @@ To install **PyCharm**, you will have to download the executable from `here
 <https://www.jetbrains.com/pycharm/download/>`__ (Professional or Community edition) and then execute it in your PC.
 
 
-*********
-Holos CLI
-*********
-
-Before using PyHolos, the user needs to install Holos CLI. This can be performed by hitting
-`this link <https://agriculture.canada.ca/holos/cli/setup.exe>`__.
-
-Once the installation terminated, the user needs to identify the location of the Holos CLI executable (H.CLI.exe) and
-to add its path to the environment variables with the name **PATH_HOLOS_CLI**:
-
-.. _fig_environment_variables:
-
-.. figure:: figs/environment_variables.png
-    :align: center
-
-    The environment variables that should be added so the system.
-    The variable **PATH_HOLOS_CLI** is mandatory while **PATH_HOLOS_SERVICE_RESOURCES** is optional and depends on the
-    intended usage of PyHolos (see :ref:`installation:Soil data files` below).
-
-
 *******************
 The PyHolos package
 *******************

@@ -1,4 +1,5 @@
 from datetime import date
+from uuid import UUID, uuid4
 
 from pyholos.components.animals.common import (Diet, HousingType,
                                                ManureStateType,
@@ -7,6 +8,8 @@ from pyholos.farm import farm_inputs
 from pyholos.farm.farm_inputs import WeatherSummary
 
 global _WEATHER_SUMMARY
+
+_DUMMY_PASTURE_LOCATION_UUID: UUID = uuid4()
 
 
 def _set_beef_bulls_data() -> list[farm_inputs.BeefManagementPeriod]:
@@ -20,6 +23,7 @@ def _set_beef_bulls_data() -> list[farm_inputs.BeefManagementPeriod]:
             production_stage=ProductionStage.gestating,
             number_of_young_animals=0,
             is_milk_fed_only=False,
+            diet_name='custom',
             diet=Diet(
                 crude_protein_percentage=14.8,
                 forage_percentage=80,
@@ -30,6 +34,7 @@ def _set_beef_bulls_data() -> list[farm_inputs.BeefManagementPeriod]:
                 neutral_detergent_fiber_percentage=46.44,
                 metabolizable_energy=2.2),
             housing_type=HousingType.pasture,
+            pasture_location=_DUMMY_PASTURE_LOCATION_UUID,
             manure_handling_system=ManureStateType.pasture,
             weather_summary=_WEATHER_SUMMARY),
         farm_inputs.BeefManagementPeriod(
@@ -41,6 +46,7 @@ def _set_beef_bulls_data() -> list[farm_inputs.BeefManagementPeriod]:
             production_stage=ProductionStage.gestating,
             number_of_young_animals=0,
             is_milk_fed_only=False,
+            diet_name='custom',
             diet=Diet(
                 crude_protein_percentage=12.44,
                 forage_percentage=97,
@@ -51,6 +57,7 @@ def _set_beef_bulls_data() -> list[farm_inputs.BeefManagementPeriod]:
                 neutral_detergent_fiber_percentage=53.478,
                 metabolizable_energy=1.965),
             housing_type=HousingType.pasture,
+            pasture_location=_DUMMY_PASTURE_LOCATION_UUID,
             manure_handling_system=ManureStateType.pasture,
             weather_summary=_WEATHER_SUMMARY),
         farm_inputs.BeefManagementPeriod(
@@ -62,6 +69,7 @@ def _set_beef_bulls_data() -> list[farm_inputs.BeefManagementPeriod]:
             production_stage=ProductionStage.gestating,
             number_of_young_animals=0,
             is_milk_fed_only=False,
+            diet_name='custom',
             diet=Diet(
                 crude_protein_percentage=15.35,
                 forage_percentage=100,
@@ -72,6 +80,7 @@ def _set_beef_bulls_data() -> list[farm_inputs.BeefManagementPeriod]:
                 neutral_detergent_fiber_percentage=49.3,
                 metabolizable_energy=2.1),
             housing_type=HousingType.confined_no_barn,
+            pasture_location=None,
             manure_handling_system=ManureStateType.deep_bedding,
             weather_summary=_WEATHER_SUMMARY)
     ]
@@ -88,6 +97,7 @@ def _set_beef_cows_data() -> list[farm_inputs.BeefManagementPeriod]:
             production_stage=ProductionStage.gestating,
             number_of_young_animals=0,
             is_milk_fed_only=False,
+            diet_name='custom',
             diet=Diet(
                 crude_protein_percentage=14.8,
                 forage_percentage=80,
@@ -98,6 +108,7 @@ def _set_beef_cows_data() -> list[farm_inputs.BeefManagementPeriod]:
                 neutral_detergent_fiber_percentage=46.44,
                 metabolizable_energy=2.2),
             housing_type=HousingType.pasture,
+            pasture_location=_DUMMY_PASTURE_LOCATION_UUID,
             manure_handling_system=ManureStateType.pasture,
             weather_summary=_WEATHER_SUMMARY),
         farm_inputs.BeefManagementPeriod(
@@ -109,6 +120,7 @@ def _set_beef_cows_data() -> list[farm_inputs.BeefManagementPeriod]:
             production_stage=ProductionStage.gestating,
             number_of_young_animals=0,
             is_milk_fed_only=False,
+            diet_name='custom',
             diet=Diet(
                 crude_protein_percentage=12.44,
                 forage_percentage=97,
@@ -119,6 +131,7 @@ def _set_beef_cows_data() -> list[farm_inputs.BeefManagementPeriod]:
                 neutral_detergent_fiber_percentage=53.478,
                 metabolizable_energy=1.965),
             housing_type=HousingType.pasture,
+            pasture_location=_DUMMY_PASTURE_LOCATION_UUID,
             manure_handling_system=ManureStateType.pasture,
             weather_summary=_WEATHER_SUMMARY),
         farm_inputs.BeefManagementPeriod(
@@ -130,6 +143,7 @@ def _set_beef_cows_data() -> list[farm_inputs.BeefManagementPeriod]:
             production_stage=ProductionStage.gestating,
             number_of_young_animals=0,
             is_milk_fed_only=False,
+            diet_name='custom',
             diet=Diet(
                 crude_protein_percentage=15.35,
                 forage_percentage=100,
@@ -140,6 +154,7 @@ def _set_beef_cows_data() -> list[farm_inputs.BeefManagementPeriod]:
                 neutral_detergent_fiber_percentage=49.3,
                 metabolizable_energy=2.1),
             housing_type=HousingType.confined_no_barn,
+            pasture_location=None,
             manure_handling_system=ManureStateType.deep_bedding,
             weather_summary=_WEATHER_SUMMARY)
     ]
@@ -156,6 +171,7 @@ def _set_beef_calf_data() -> list[farm_inputs.BeefManagementPeriod]:
             production_stage=ProductionStage.gestating,
             number_of_young_animals=0,
             is_milk_fed_only=True,
+            diet_name='custom',
             diet=Diet(
                 crude_protein_percentage=12.44,
                 forage_percentage=97,
@@ -166,6 +182,7 @@ def _set_beef_calf_data() -> list[farm_inputs.BeefManagementPeriod]:
                 neutral_detergent_fiber_percentage=53.478,
                 metabolizable_energy=1.965),
             housing_type=HousingType.confined_no_barn,
+            pasture_location=None,
             manure_handling_system=ManureStateType.deep_bedding,
             weather_summary=_WEATHER_SUMMARY),
         farm_inputs.BeefManagementPeriod(
@@ -177,6 +194,7 @@ def _set_beef_calf_data() -> list[farm_inputs.BeefManagementPeriod]:
             production_stage=ProductionStage.gestating,
             number_of_young_animals=0,
             is_milk_fed_only=False,
+            diet_name='custom',
             diet=Diet(
                 crude_protein_percentage=14.8,
                 forage_percentage=80,
@@ -187,6 +205,7 @@ def _set_beef_calf_data() -> list[farm_inputs.BeefManagementPeriod]:
                 neutral_detergent_fiber_percentage=46.44,
                 metabolizable_energy=2.2),
             housing_type=HousingType.pasture,
+            pasture_location=_DUMMY_PASTURE_LOCATION_UUID,
             manure_handling_system=ManureStateType.pasture,
             weather_summary=_WEATHER_SUMMARY)
     ]
@@ -202,6 +221,7 @@ def _set_beef_finisher_data() -> list[farm_inputs.BeefManagementPeriod]:
         production_stage=ProductionStage.gestating,
         number_of_young_animals=0,
         is_milk_fed_only=False,
+        diet_name='custom',
         diet=Diet(
             crude_protein_percentage=12.72,
             forage_percentage=10,
@@ -212,6 +232,7 @@ def _set_beef_finisher_data() -> list[farm_inputs.BeefManagementPeriod]:
             neutral_detergent_fiber_percentage=21.95,
             metabolizable_energy=2.92),
         housing_type=HousingType.confined_no_barn,
+        pasture_location=None,
         manure_handling_system=ManureStateType.deep_bedding,
         weather_summary=_WEATHER_SUMMARY)
 
@@ -228,6 +249,7 @@ def _set_beef_stocker_and_backgrounder_data() -> list[farm_inputs.BeefManagement
         production_stage=ProductionStage.gestating,
         number_of_young_animals=0,
         is_milk_fed_only=False,
+        diet_name='custom',
         diet=Diet(
             crude_protein_percentage=12.28,
             forage_percentage=65,
@@ -238,6 +260,7 @@ def _set_beef_stocker_and_backgrounder_data() -> list[farm_inputs.BeefManagement
             neutral_detergent_fiber_percentage=42.025,
             metabolizable_energy=2.48),
         housing_type=HousingType.confined_no_barn,
+        pasture_location=None,
         manure_handling_system=ManureStateType.deep_bedding,
         weather_summary=_WEATHER_SUMMARY)
     return [management_period]

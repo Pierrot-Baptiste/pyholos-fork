@@ -7,10 +7,9 @@ from pyholos.common2 import CanadianProvince
 from pyholos.components.land_management import field_system
 from pyholos.components.land_management.carbon.relative_biomass_information import (
     get_relative_biomass_information_data, parse_table_7)
-from pyholos.components.land_management.common import (FertilizerBlends,
-                                                       HarvestMethod,
-                                                       IrrigationType,
-                                                       TillageType)
+from pyholos.components.land_management.common import (
+    FertilizerApplicationMethodologies, FertilizerBlends, HarvestMethod,
+    IrrigationType, TillageType)
 from pyholos.components.land_management.crop import CropType
 from pyholos.defaults import Defaults
 from pyholos.soil import SoilFunctionalCategory
@@ -82,17 +81,24 @@ class TestLandManagementBase(unittest.TestCase):
                         HarvestMethod.GreenManure,
                         HarvestMethod.Silage,
                         HarvestMethod.Swathing
-                    ]:
+                    ] and not crop.is_silage_crop():
                         self.land_management_base.crop_type.value = crop
                         self.land_management_base.harvest_method.value = harvest_method
                         self.land_management_base.set_moisture_content()
-                        self.assertEqual(
-                            self.land_management_base.moisture_content_of_crop.value * 100.,
-                            self.land_management_base.moisture_content_of_crop_percentage.value)
+                        if not crop.is_perennial():
+                            self.assertEqual(
+                                self.land_management_base.moisture_content_of_crop.value * 100.,
+                                self.land_management_base.moisture_content_of_crop_percentage.value)
+                        else:
+                            self.assertEqual(
+                                80,
+                                self.land_management_base.moisture_content_of_crop_percentage.value)
 
     def test_set_moisture_content_default_value(self):
         self.land_management_base.moisture_content_of_crop.value = 0
         for crop in CropType:
+            if crop.is_perennial():
+                continue  # not targeted by this test
             if crop not in CropTypePerCategory.silage_crop:
                 for harvest_method in HarvestMethod:
                     if harvest_method not in [
@@ -303,6 +309,7 @@ class TestCropViewItem(unittest.TestCase):
                 organic_carbon_percentage=3.2,
                 soil_top_layer_thickness=230,
                 soil_functional_category=SoilFunctionalCategory.EasternCanada,
+                fertilizer_application_method=FertilizerApplicationMethodologies.IncorporatedOrPartiallyInjected,
                 fertilizer_blend=FertilizerBlends.Custom,
                 evapotranspiration=self.weather_data['Mean Daily Pet'],
                 precipitation=self.weather_data['Mean Daily Precipitation'],

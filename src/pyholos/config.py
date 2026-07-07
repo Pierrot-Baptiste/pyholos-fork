@@ -1,15 +1,49 @@
 from __future__ import annotations
 
+import zipfile
 from os import environ
 from pathlib import Path
 
 DATE_FMT = "%Y-%m-%d"
 
-_PATH_HOLOS_SERVICE_RESOURCES = Path(__file__).parent / 'resources'
+_PATH_RESOURCES = Path(__file__).parent / 'resources'
+
+_PATH_RESOURCES_UNZIP: Path = _PATH_RESOURCES if (pth := environ.get('PATH_RESOURCES_UNZIP')) is None else Path(pth)
+
+
+def _ensure_resources_extracted():
+    """Extract resource zip files if not already extracted.
+
+    ZIPs are always stored in the package resources directory (_PATH_RESOURCES).
+    Extraction happens to _PATH_RESOURCES_UNZIP (can be /tmp for Lambda).
+    """
+    # Extract HOLOS CLI if needed
+    holos_cli_zip = _PATH_RESOURCES / 'holos4_cli.zip'  # Source: package resources
+    holos_cli_dir = _PATH_RESOURCES_UNZIP / 'holos4_cli'  # Destination: writable location
+    holos_cli_exe = holos_cli_dir / 'H.CLI.exe'
+
+    if holos_cli_zip.exists() and not holos_cli_exe.exists():
+        with zipfile.ZipFile(holos_cli_zip, 'r') as zip_ref:
+            zip_ref.extractall(_PATH_RESOURCES_UNZIP)
+
+    # Extract SLC data if needed
+    slc_zip = _PATH_RESOURCES / 'soil_landscapes_of_canada_v3r2.zip'  # Source: package resources
+    slc_dir = _PATH_RESOURCES_UNZIP / 'soil_landscapes_of_canada_v3r2'  # Destination: writable location
+    slc_geojson = slc_dir / 'soil_landscapes_of_canada_v3r2.geojson'
+
+    if slc_zip.exists() and not slc_geojson.exists():
+        with zipfile.ZipFile(slc_zip, 'r') as zip_ref:
+            zip_ref.extractall(_PATH_RESOURCES_UNZIP)
+
+
+# Auto-extract resources on import
+_ensure_resources_extracted()
+
+PATH_HOLOS_CLI = _PATH_RESOURCES_UNZIP / 'holos4_cli/H.CLI.exe'
 
 
 class PathsHolosResources:
-    _path_root = _PATH_HOLOS_SERVICE_RESOURCES / 'holos'
+    _path_root = _PATH_RESOURCES / 'holos'
     Table_Tillage_Factor = _path_root / (
         'Table_Tillage_Factor.csv')
     Table_6_Manure_Types_And_Default_Composition = _path_root / (
@@ -44,7 +78,7 @@ class PathsHolosResources:
 
 
 class PathsSlcData:
-    _path_root = _PATH_HOLOS_SERVICE_RESOURCES / 'soil_landscapes_of_canada_v3r2'
+    _path_root = _PATH_RESOURCES_UNZIP / 'soil_landscapes_of_canada_v3r2'
     geojson_file = _path_root / 'soil_landscapes_of_canada_v3r2.geojson'
     csv_dir = _path_root / 'soil_landscapes_of_canada_v3r2_csv'
     cmp_file = csv_dir / 'ca_all_slc_v3r2_cmp.csv'

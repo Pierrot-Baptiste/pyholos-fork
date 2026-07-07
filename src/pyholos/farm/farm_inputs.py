@@ -6,32 +6,43 @@ from typing import ClassVar, Generator, Type, Optional, Annotated, Mapping, Any
 from functools import partial
 from uuid import UUID, uuid4
 
-from pydantic import (BaseModel, Field, NonNegativeFloat, NonNegativeInt,
-                      PositiveFloat, PositiveInt, field_validator)
+from pydantic import (
+    BaseModel,
+    Field,
+    NonNegativeFloat,
+    NonNegativeInt,
+    PositiveFloat,
+    PositiveInt,
+    field_validator
+)
 
 from pyholos.common2 import CanadianProvince
 from pyholos.components.animals import beef, dairy, sheep
-from pyholos.components.animals.common import (BeddingMaterialType,
-                                               Diet,
-                                               DietAdditiveType,
-                                               HousingType,
-                                               ManureAnimalSourceTypes,
-                                               ManureLocationSourceType,
-                                               ManureStateType,
-                                               Milk,
-                                               ProductionStage,
-                                               get_manure_emission_factors)
+from pyholos.components.animals.common import (
+    BeddingMaterialType,
+    Diet,
+    DietAdditiveType,
+    HousingType,
+    ManureAnimalSourceTypes,
+    ManureLocationSourceType,
+    ManureStateType,
+    Milk,
+    ProductionStage,
+    get_manure_emission_factors
+)
 from pyholos.components.land_management.carbon.relative_biomass_information import (
     RelativeBiomassInformationData,
     get_relative_biomass_information_data,
     parse_table_7
-    )
-from pyholos.components.land_management.common import (FertilizerApplicationMethodologies,
-                                                       FertilizerBlends,
-                                                       HarvestMethod,
-                                                       IrrigationType,
-                                                       ManureApplicationTypes,
-                                                       TillageType)
+)
+from pyholos.components.land_management.common import (
+    FertilizerApplicationMethodologies,
+    FertilizerBlends,
+    HarvestMethod,
+    IrrigationType,
+    ManureApplicationTypes,
+    TillageType
+)
 from pyholos.components.land_management.crop import CropType
 from pyholos.components.land_management.field_system import CropViewItem
 from pyholos.core_constants import CoreConstants
@@ -119,6 +130,7 @@ class BeefManagementPeriod(BaseModel):
     production_stage: ProductionStage
     number_of_young_animals: Annotated[int, Field(ge=0)]
     is_milk_fed_only: bool
+    diet_name: str
     diet: Diet
     housing_type: HousingType
     manure_handling_system: ManureStateType
@@ -128,6 +140,7 @@ class BeefManagementPeriod(BaseModel):
     average_daily_gain: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
     diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
+    pasture_location: UUID | None = None
 
 
 class DairyManagementPeriod(BaseModel):
@@ -144,6 +157,10 @@ class DairyManagementPeriod(BaseModel):
     housing_type: HousingType
     manure_handling_system: ManureStateType
     weather_summary: WeatherSummary
+    start_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    end_weight: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    average_daily_gain: Optional[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = None
+    diet_additive_type: DietAdditiveType = DietAdditiveType.NONE
     bedding_material_type: BeddingMaterialType = BeddingMaterialType.straw
 
     # --- Overrides Inputs that can be automatically generated ---
@@ -311,25 +328,27 @@ class BeefCattleInput(AnimalInputBase):
             number_of_young_animals=management_period.number_of_young_animals,
             is_milk_fed_only=management_period.is_milk_fed_only,
             milk_data=Milk(),
+            diet_name=management_period.diet_name,
             diet=management_period.diet,
             housing_type=management_period.housing_type,
             manure_handling_system=management_period.manure_handling_system,
             manure_emission_factors=get_manure_emission_factors(
-                animal_type=component_class.animal_group.group_type,
-                year=management_period.weather_summary.year,
                 manure_state_type=management_period.manure_handling_system,
                 mean_annual_precipitation=management_period.weather_summary.mean_annual_precipitation,
                 mean_annual_temperature=management_period.weather_summary.mean_annual_temperature,
                 mean_annual_evapotranspiration=management_period.weather_summary.mean_annual_evapotranspiration,
                 growing_season_precipitation=management_period.weather_summary.growing_season_precipitation,
                 growing_season_evapotranspiration=management_period.weather_summary.growing_season_evapotranspiration,
+                animal_type=component_class.animal_group.group_type,
                 province=province,
+                year=management_period.weather_summary.year,
                 soil_texture=soil_texture),
             start_weight=management_period.start_weight,
             end_weight=management_period.end_weight,
             average_daily_gain=management_period.average_daily_gain,
             diet_additive_type=management_period.diet_additive_type,
-            bedding_material_type=management_period.bedding_material_type
+            bedding_material_type=management_period.bedding_material_type,
+            pasture_location=management_period.pasture_location,
         )
 
 
@@ -339,7 +358,6 @@ class DairyCattleInput(AnimalInputBase):
     LactatingCow: list[DairyManagementPeriod] | None = None
     Calves: list[DairyManagementPeriod] | None = None
     DryCow: list[DairyManagementPeriod] | None = None
-    YoungBulls: list[DairyManagementPeriod] | None = None
     DairyBulls: list[DairyManagementPeriod] | None = None
 
     @staticmethod
@@ -398,7 +416,14 @@ class DairyCattleInput(AnimalInputBase):
                 year=management_period.weather_summary.year,
                 soil_texture=soil_texture
             ),
+
+            start_weight=management_period.start_weight,
+            end_weight=management_period.end_weight,
+            average_daily_gain=management_period.average_daily_gain,
+
             bedding_material_type=management_period.bedding_material_type,
+            diet_additive_type=management_period.diet_additive_type,
+
             holos_overrides=management_period.holos_overrides
         )
 
@@ -472,7 +497,8 @@ class SheepFlockInput(AnimalInputBase):
                 animal_type=component_class.animal_type,
                 province=province,
                 year=management_period.weather_summary.year,
-                soil_texture=soil_texture)
+                soil_texture=soil_texture
+            ),
         )
 
 
@@ -488,6 +514,7 @@ class FieldAnnualData(BaseModel):
     tillage_type: TillageType
     harvest_method: HarvestMethod
     nitrogen_fertilizer_rate: NonNegativeFloat = Field(default=0)
+    fertilizer_application_method: FertilizerApplicationMethodologies
     fertilizer_blend: FertilizerBlends
     irrigation_type: IrrigationType = IrrigationType.RainFed
     amount_of_irrigation: NonNegativeFloat = 0
@@ -638,6 +665,7 @@ class FieldsInput(BaseModel):
             organic_carbon_percentage=organic_carbon_percentage,
             soil_top_layer_thickness=soil_top_layer_thickness,
             soil_functional_category=soil_functional_category,
+            fertilizer_application_method=field_one_year_data.fertilizer_application_method,
             fertilizer_blend=field_one_year_data.fertilizer_blend,
             evapotranspiration=weather_data.potential_evapotranspiration,
             precipitation=weather_data.precipitation,
@@ -652,7 +680,6 @@ class FieldsInput(BaseModel):
             manure_location_source_type=field_one_year_data.manure_location_source_type,
             moisture_content_of_crop=field_one_year_data.moisture_content_of_crop,
             moisture_content_of_crop_percentage=field_one_year_data.moisture_content_of_crop_percentage,
-            fertilizer_application_method=field_one_year_data.fertilizer_application_method
         )
 
     def _create_field_component(

@@ -1,6 +1,7 @@
 from datetime import date
 from enum import StrEnum
 from dataclasses import dataclass
+from uuid import UUID
 
 from pandas import to_numeric
 
@@ -146,6 +147,7 @@ class SheepBase(Component):
         self.ndf = HolosVar(name="NDF", value=None)
         self.gain_coefficient_a = HolosVar(name="Gain Coefficient A", value=None)
         self.gain_coefficient_b = HolosVar(name="Gain Coefficient B", value=None)
+        self.housing_type = HolosVar(name="Housing Type", value=None)
         self.activity_coefficient_of_feeding_situation = HolosVar(name="Activity Coefficient Of Feeding Situation",
                                                                   value=None)
         self.maintenance_coefficient = HolosVar(name="Maintenance Coefficient", value=None)
@@ -155,6 +157,10 @@ class SheepBase(Component):
         self.total_nitrogen_kilograms_dry_matter_for_bedding = HolosVar(
             name="Total Nitrogen Kilograms Dry Matter For Bedding", value=None)
         self.moisture_content_of_bedding_material = HolosVar(name="Moisture Content Of Bedding Material", value=None)
+
+        self.pasture_location = HolosVar(name="Pasture Location", value=None)
+        self.manure_state_type = HolosVar(name="Manure State Type", value=None)
+
         self.methane_conversion_factor_of_manure = HolosVar(name="Methane Conversion Factor Of Manure", value=None)
         self.n2o_direct_emission_factor = HolosVar(name="N2O Direct Emission Factor", value=None)
         self.emission_factor_volatilization = HolosVar(name="Emission Factor Volatilization", value=None)
@@ -218,7 +224,13 @@ class Sheep(SheepBase):
 
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
+            pasture_location: UUID | None = None,
     ):
+        if pasture_location is None:
+            assert housing_type != HousingType.pasture, (
+                "Pasture location must be specified (UUID). "
+                "Ensure that the same UUID is set to an existing field data under 'Field System Component Guid'")
+
         super().__init__()
 
         # group_name = GroupNames.sheep_feedlot.value
@@ -243,6 +255,7 @@ class Sheep(SheepBase):
         self.end_weight.value = _animal_coefficient_data.final_weight if end_weight is None else end_weight
         self.gain_coefficient_a.value = _animal_coefficient_data.coefficient_a
         self.gain_coefficient_b.value = _animal_coefficient_data.coefficient_b
+        self.housing_type.value = housing_type.value
         self.wool_production.value = _animal_coefficient_data.wool_production
 
         if average_daily_gain is None:
@@ -277,6 +290,9 @@ class Sheep(SheepBase):
             bedding.total_nitrogen_kilograms_dry_matter_for_bedding.value
         )
         self.moisture_content_of_bedding_material.value = bedding.moisture_content_of_bedding_material.value
+
+        self.pasture_location.value = str(pasture_location) if pasture_location is not None else "N/A"
+        self.manure_state_type.value = manure_handling_system.value
 
         self.methane_conversion_factor_of_manure.value = manure_emission_factors.MethaneConversionFactor
         self.n2o_direct_emission_factor.value = manure_emission_factors.N2ODirectEmissionFactor
@@ -317,6 +333,7 @@ class SheepFeedlot(Sheep):
             average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
+            pasture_location: UUID | None = None,
     ):
         _group_name = GroupNames.sheep_feedlot.value
         super().__init__(
@@ -350,6 +367,7 @@ class Rams(Sheep):
             average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
+            pasture_location: UUID | None = None,
     ):
         _group_name = GroupNames.rams.value
 
@@ -384,6 +402,7 @@ class Ewes(Sheep):
             average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
+            pasture_location: UUID | None = None,
     ):
         super().__init__(
             name=GroupNames.lambs_and_ewes.value,
@@ -416,6 +435,7 @@ class Lambs(Sheep):
             average_daily_gain: float | None = None,
             diet_additive_type: DietAdditiveType = DietAdditiveType.NONE,
             bedding_material_type: BeddingMaterialType = BeddingMaterialType.NONE,
+            pasture_location: UUID | None = None,
     ):
         super().__init__(
             name=GroupNames.lambs_and_ewes.value,
