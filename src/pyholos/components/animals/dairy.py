@@ -50,8 +50,8 @@ class GroupNameType(EnumGeneric):
     dairy_bulls = GroupNameInfo(group_type=AnimalType.dairy_bulls)
 
 
-# Constant that contains every columns the final CSVs need to have for this component.
-# Might be interresting to regroup columns that are shared between all animals components.
+# Constant that contains all columns the final CSVs need to have for this component.
+# Might be interesting to regroup columns that are shared between all animals components.
 _DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...] = (
     # (attribute_name, holos_name, type, value)   value can be a callable here
     ("name", "Name", str, "Dairy cattle"),
@@ -175,12 +175,12 @@ class Dairy(DairyBase, ABC):
     indoor_barn_temperature: FloatOrNA = field(init=False)
 
     def update_holos_var(self, var_name: str, value: Any) -> None:
-        """Method to set an attribute to its default value in this class, but checks if holos_overides
+        """Method to set an attribute to its default value in this class, but checks if holos_overrides
         offers an override for the variable first
 
         Args:
-            var_name (str): _description_
-            value (Any): _description_
+            var_name (str): variable name as used by the class
+            value (Any): variable value
         """
         if var_name not in self.holos_var_names:
             raise KeyError(f"{var_name} is not a valid Holos variable.")

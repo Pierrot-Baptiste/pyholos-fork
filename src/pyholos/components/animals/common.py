@@ -25,11 +25,11 @@ class AnimalComponent:
 
     @cached_property
     def holos_var_names(self) -> set[str]:
-        return {var_name for var_name, _, _, _ in self.ANIMAL_COMPONENT_HOLOS_VAR}
+        return {var_name for var_name, *_ in self.ANIMAL_COMPONENT_HOLOS_VAR}
 
     def to_dict(self) -> dict:
         out = dict()
-        for attr_name, _, _, _ in self.ANIMAL_COMPONENT_HOLOS_VAR:
+        for attr_name, *_ in self.ANIMAL_COMPONENT_HOLOS_VAR:
             current_value = getattr(self, attr_name, None)
             if not isinstance(current_value, HolosVar):
                 raise ValueError(f"Attribute {attr_name} should be a HolosVar instance")
@@ -51,7 +51,7 @@ class AnimalComponent:
                 return str(value).upper()
             case _:
                 return value
-        return value
+
 
     def _fix_holos_vars(self):
         """Helper function that processes every attributes listed in holos_vars and
@@ -2430,18 +2430,6 @@ def read_table_6():
     return manure_composition_data.set_index(['animal_type', 'manure_state_type'])
 
 
-def read_table_18():
-    # Load the table
-    diet_coefficients = read_holos_resource_table(
-        path_file=PathsHolosResources.Table_18_Diet_Coefficients_For_Beef_Dairy_Sheep
-    )
-    # Clean the AnimalType column
-    regex = r" \(\d*\)"
-    diet_coefficients['AnimalType'] = diet_coefficients['AnimalType'].str.replace(regex, "", regex=True)
-    diet_coefficients["DietType"] = diet_coefficients['DietType'].str.replace(regex, "", regex=True)
-    return diet_coefficients
-
-
 def read_table_29():
     excretion_rates = read_holos_resource_table(
         path_file=PathsHolosResources.Table_29_Percentage_Total_Manure_Produced_In_Systems)
@@ -2453,9 +2441,6 @@ class HolosTables:
     Table_6_Manure_Types_And_Default_Composition: DataFrame = read_table_6()
     Table_16_Livestock_Coefficients_BeefAndDairy_Cattle_Provider = read_holos_resource_table(
         path_file=PathsHolosResources.Table_16_Livestock_Coefficients_BeefAndDairy_Cattle_Provider,
-        index_col="AnimalType")
-    Table_18_Diet_Coefficients_For_Beef_Dairy_Sheep: DataFrame = read_holos_resource_table(
-        path_file=PathsHolosResources.Table_18_Diet_Coefficients_For_Beef_Dairy_Sheep,
         index_col="AnimalType")
     Table_21_Average_Milk_Production_For_Dairy_Cows_By_Province = read_holos_resource_table(
         path_file=PathsHolosResources.Table_21_Average_Milk_Production_For_Dairy_Cows_By_Province,

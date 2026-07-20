@@ -194,7 +194,7 @@ class LandManagementBase(Component):
         """Sets the moisture percentage of the harvested biomass.
 
         Holos source code:
-            https://github.com/holos-aafc/Holos/blob/23a53f1fe6796145cc3ac43c005dbcc560421deb/H.Core/Services/Initialization/Crops/CropInitializationService.Water.cs#L60
+            https://github.com/holos-aafc/Holos/blob/a2978b700cb15a1284abc4856a4eefd3aabac905/H.Core/Services/Initialization/Crops/CropInitializationService.Water.cs#L60
         """
         if self.crop_type.value.is_perennial():
             self.moisture_content_of_crop_percentage.value = 80
