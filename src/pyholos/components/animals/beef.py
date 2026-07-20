@@ -86,7 +86,7 @@ class GroupNameType(EnumGeneric):
     )
 
 
-BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...] = (
+_BEEF_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...] = (
     # (attr_name, holos_name, default)
     ("name", "Name", str, "Beef"),
     ("component_type", "Component Type", str, COMPONENT_TYPE_ROOT),
@@ -150,7 +150,7 @@ class BeefBase(AnimalComponent):
     """Base class for beef components.  Only needs to define the ANIMAL_COMPONENT_HOLOS_VAR class variable."""
     ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[
         tuple[tuple[str, str, type | TypeAliasType, Any], ...]
-    ] = BEEF_COMPONENT_HOLOS_VAR
+    ] = _BEEF_COMPONENT_HOLOS_VAR
 
 
 @dataclass

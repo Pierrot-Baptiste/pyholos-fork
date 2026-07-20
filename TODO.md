@@ -115,7 +115,7 @@ Wherever HolosVars are declared, use a **single, explicit structure**, e.g.:
 ```python
 # Constant that contains every column the final CSV needs to have for this component
 # value can be a literal or a callable
-DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, Any, HolosVarStatus], ...] = (
+_DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, Any, HolosVarStatus], ...] = (
     # (attribute_name, holos_name, value, status)
     ("name", "Name", "Dairy cattle", HolosVarStatus.ACTIVE),
     ("component_type", "Component Type", "H.Core.Models.Animals.Dairy.DairyComponent", HolosVarStatus.ACTIVE),

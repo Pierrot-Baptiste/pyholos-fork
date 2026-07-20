@@ -52,7 +52,7 @@ class GroupNameType(EnumGeneric):
 
 # Constant that contains every columns the final CSVs need to have for this component.
 # Might be interresting to regroup columns that are shared between all animals components.
-DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...] = (
+_DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...] = (
     # (attribute_name, holos_name, type, value)   value can be a callable here
     ("name", "Name", str, "Dairy cattle"),
     ("component_type", "Component Type", str, "H.Core.Models.Animals.Dairy.DairyComponent"),
@@ -116,7 +116,7 @@ DAIRY_COMPONENT_HOLOS_VAR: tuple[tuple[str, str, type | TypeAliasType, Any], ...
 class DairyBase(AnimalComponent):
     ANIMAL_COMPONENT_HOLOS_VAR: ClassVar[
         tuple[tuple[str, str, type | TypeAliasType, Any], ...]
-    ] = DAIRY_COMPONENT_HOLOS_VAR
+    ] = _DAIRY_COMPONENT_HOLOS_VAR
 
 
 @dataclass

@@ -262,9 +262,9 @@ class TestDairyRefactorUnit(unittest.TestCase):
 
         # Option: vérifier que les objets HolosVar ne sont pas recréés
         # (nécessite que _fix_holos_vars mette à jour in-place si HolosVar déjà là)
-        before = {attr: getattr(obj, attr) for (attr, _, _, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR}
+        before = {attr: getattr(obj, attr) for (attr, _, _, _) in dairy._DAIRY_COMPONENT_HOLOS_VAR}
         obj._fix_holos_vars()
-        after = {attr: getattr(obj, attr) for (attr, _, _, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR}
+        after = {attr: getattr(obj, attr) for (attr, _, _, _) in dairy._DAIRY_COMPONENT_HOLOS_VAR}
         for attr in before:
             self.assertIs(before[attr], after[attr], f"HolosVar for '{attr}' should be updated in-place, not recreated")
 
@@ -310,7 +310,7 @@ class TestDairyRefactorUnit(unittest.TestCase):
     def test_all_schema_columns_present(self):
         obj = self.make_heifers()
         out = obj.to_dict()
-        expected_columns = [csv_name for (_, csv_name, _, _) in dairy.DAIRY_COMPONENT_HOLOS_VAR]
+        expected_columns = [csv_name for (_, csv_name, _, _) in dairy._DAIRY_COMPONENT_HOLOS_VAR]
         for col in expected_columns:
             self.assertIn(col, out, f"Column '{col}' declared in schema should be present in to_dict()")
 
@@ -337,7 +337,7 @@ class TestDairyRefactorUnit(unittest.TestCase):
     def test_callable_default_in_schema(self):
         # On insère temporairement un champ de spec avec default callable
         # qui dépend de l'instance (ex: renvoyer group_name sous une autre clé)
-        tmp_schema = list(deepcopy(dairy.DAIRY_COMPONENT_HOLOS_VAR))
+        tmp_schema = list(deepcopy(dairy._DAIRY_COMPONENT_HOLOS_VAR))
         tmp_schema.append(("synthetic_field", "Synthetic Field", str, lambda self: f"{self.group_name}-X"))
 
         try:
