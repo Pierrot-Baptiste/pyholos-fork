@@ -164,6 +164,9 @@ cython_debug/
 misc/
 docs/_build
 
+# VSCode
+.vscode/
+
 example/extended_usage/farm_data/
 example/extended_usage/output/
 example/minimal_usage/*
