@@ -164,7 +164,7 @@ class DairyManagementPeriod(BaseModel):
     """
     Base input class for dairy cattle management periods.
 
-    Note:
+    Note1:
         No validation is performed on the consistency between:
 
         - start_weight
@@ -176,6 +176,14 @@ class DairyManagementPeriod(BaseModel):
         modelling workflows. It is therefore the responsibility of the
         caller to ensure that the provided values are appropriate for the
         intended use case.
+
+    Note2:
+        number_of_animals is currently defined as a float to support
+        advanced modelling workflows.
+
+        However, Holos V4 currently expects an integer value for the number of animals.
+        As a result, exporting fractional animal counts may produce CSV files
+        that are rejected by Holos CLI.
     """
     # --- Structural Inputs, cannot be automatically generated ---
     name: Annotated[str, Field(min_length=1)]
