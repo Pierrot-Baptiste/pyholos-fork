@@ -215,7 +215,6 @@ class Beef(BeefBase):
             housing_type=housing_type)
 
     def __post_init__(self):
-        # TODO: A lot of repetition with Dairy component here. Could centralise the logic of shared work
         if self.pasture_location is None:
             assert self.housing_type != HousingType.pasture, (
                 "Pasture location must be specified (UUID). "
