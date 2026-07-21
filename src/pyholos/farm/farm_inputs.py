@@ -122,6 +122,23 @@ class WeatherSummary(BaseModel):
 
 # region Management Periods
 class BeefManagementPeriod(BaseModel):
+    """
+    Base input class for beef cattle management periods.
+
+    Note:
+        No validation is performed on the consistency between:
+
+        - start_weight
+        - end_weight
+        - average_daily_gain
+        - days
+
+        These values may be specified independently to support advanced
+        modelling workflows. It is therefore the responsibility of the
+        caller to ensure that the provided values are appropriate for the
+        intended use case.
+    """
+
     name: Annotated[str, Field(min_length=1)]
     start_date: date
     days: Annotated[int, Field(gt=0)]
@@ -144,6 +161,22 @@ class BeefManagementPeriod(BaseModel):
 
 
 class DairyManagementPeriod(BaseModel):
+    """
+    Base input class for dairy cattle management periods.
+
+    Note:
+        No validation is performed on the consistency between:
+
+        - start_weight
+        - end_weight
+        - average_daily_gain
+        - days
+
+        These values may be specified independently to support advanced
+        modelling workflows. It is therefore the responsibility of the
+        caller to ensure that the provided values are appropriate for the
+        intended use case.
+    """
     # --- Structural Inputs, cannot be automatically generated ---
     name: Annotated[str, Field(min_length=1)]
     start_date: date
